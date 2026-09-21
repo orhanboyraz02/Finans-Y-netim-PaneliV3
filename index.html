@@ -67,6 +67,13 @@
   .pkg-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,.12); }
   .pkg-popular { border: 2px solid #f59e0b; }
   .pkg-popular::before { content: "EN POPÜLER"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #f59e0b; color: #fff; font-size: 10px; font-weight: 800; padding: 4px 12px; border-radius: 999px; letter-spacing: .5px; }
+  /* SIDEBAR SCROLL */
+  .sidebar-nav { max-height: calc(100vh - 110px); overflow-y: auto; overflow-x: hidden; }
+  .sidebar-nav::-webkit-scrollbar { width: 8px; }
+  .sidebar-nav::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar-nav::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+  .sidebar-nav::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+  .sidebar-nav { scrollbar-width: thin; scrollbar-color: #475569 #1e293b; }
   @media print { .no-print { display: none !important; } .card { box-shadow: none; border: 1px solid #e2e8f0; } }
 </style>
 </head>
@@ -117,14 +124,14 @@
 
 <!-- ==================== APP ==================== -->
 <div id="app" class="hidden min-h-screen">
-  <aside id="sidebar" class="sidebar w-64 min-h-screen text-slate-300 fixed top-0 left-0 z-40 -translate-x-full md:translate-x-0 transition-transform overflow-y-auto no-print">
+  <aside id="sidebar" class="sidebar w-64 fixed top-0 left-0 z-40 -translate-x-full md:translate-x-0 transition-transform no-print" style="height:100vh;">
     <div class="p-5 border-b border-slate-700">
       <h1 class="text-base font-bold text-white leading-tight">ODAK <span class="text-amber-500">Finansal</span><br>Yönetim Paneli</h1>
       <p class="text-xs text-slate-400 mt-2" id="userGreeting">Hoş geldiniz</p>
       <div class="mt-2"><span id="userPlanBadge" class="badge badge-amber">FREE</span></div>
     </div>
 
-    <nav class="pb-8">
+    <nav class="sidebar-nav pb-8">
       <a href="#" onclick="showPage('dashboard')" class="nav-link active flex items-center gap-3 px-5 py-2.5 text-sm" data-page="dashboard">📊 Dashboard</a>
 
       <div class="nav-section">Finans</div>
@@ -508,7 +515,6 @@
 
     </div>
 
-    <!-- FOOTER -->
     <footer class="bg-slate-900 text-slate-300 px-6 py-6 mt-6 no-print">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
         <div>
@@ -620,10 +626,11 @@
 
 <script>
 /* ============================================================
-   ODAK Finansal Yönetim Paneli — v4
+   ODAK Finansal Yönetim Paneli — v5
+   12 VARLIK • SIDEBAR KAYDIRMALI • TAM ÇALIŞIR
    ============================================================ */
 
-const STORAGE_KEY = 'odak_finansal_yonetim_v4';
+const STORAGE_KEY = 'odak_finansal_yonetim_v5';
 const ADMIN_CREDS = { user: 'admin', pass: 'odak2026' };
 const CFO = { name: 'Orhan Boyraz', phone: '05409666602', phoneDisplay: '0540 966 66 02', address: 'Bursa / Türkiye' };
 
@@ -631,6 +638,22 @@ function isoDate(monthOffset, day) {
   const d = new Date(); d.setMonth(d.getMonth() - monthOffset); d.setDate(day);
   return d.toISOString().slice(0,10);
 }
+
+// ==================== 12 VARLIK (VARSAYILAN) ====================
+const DEFAULT_ASSETS = [
+  { id: 1, name: 'Ev / Konut', category: 'Gayrimenkul', qty: 1, unitValue: 5000000 },
+  { id: 2, name: 'Araba', category: 'Araç', qty: 1, unitValue: 850000 },
+  { id: 3, name: 'Altın (Gram)', category: 'Altın', qty: 100, unitValue: 2400 },
+  { id: 4, name: 'Gümüş (Gram)', category: 'Gümüş', qty: 500, unitValue: 30 },
+  { id: 5, name: 'Dolar', category: 'Döviz', qty: 5000, unitValue: 34 },
+  { id: 6, name: 'Euro', category: 'Döviz', qty: 2000, unitValue: 37 },
+  { id: 7, name: 'Hisse Senedi', category: 'Hisse', qty: 1500, unitValue: 1000 },
+  { id: 8, name: 'Yatırım Fonu', category: 'Fon', qty: 1, unitValue: 250000 },
+  { id: 9, name: 'Bitcoin', category: 'Kripto', qty: 1, unitValue: 550000 },
+  { id: 10, name: 'Nakit TL', category: 'Nakit', qty: 1, unitValue: 75000 },
+  { id: 11, name: 'Vadeli Mevduat', category: 'Banka', qty: 1, unitValue: 200000 },
+  { id: 12, name: 'İşletme Hissesi', category: 'İşletme', qty: 1, unitValue: 300000 },
+];
 
 const DEFAULT_MARKET_PRODUCTS = [
   { id: 1, name: 'Finansal Özgürlük E-Kitabı', price: 199, category: 'E-Kitap', desc: 'FIRE rehberi, 200 sayfa', icon: '📘' },
@@ -680,10 +703,7 @@ const defaultData = {
   receivables: [
     { id: 1, debtor: 'Ahmet Y.', description: 'Borç verilen', total: 250000, collected: 100000, status: 'Kısmi tahsilat', due: '2026-12-31' },
   ],
-  assets: [
-    { id: 1, name: 'Ev', category: 'Gayrimenkul', qty: 1, unitValue: 5000000 },
-    { id: 2, name: 'Altın', category: 'Altın', qty: 100, unitValue: 20000 },
-  ],
+  assets: JSON.parse(JSON.stringify(DEFAULT_ASSETS)),
   investments: [
     { id: 1, name: 'Hisse Senedi', category: 'Hisse', amount: 1500000, cost: 1200000 },
     { id: 2, name: 'Kripto', category: 'Kripto', amount: 1000000, cost: 900000 },
@@ -724,14 +744,12 @@ function uid() { return Date.now() + Math.floor(Math.random()*10000); }
 function fmt(n) { return '₺' + Number(n||0).toLocaleString('tr-TR', {maximumFractionDigits:0}); }
 function esc(s) { return String(s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c])); }
 
-// ==================== LANG ====================
 function setLang(lang) {
   data.lang = lang; saveData();
   document.documentElement.lang = lang;
   const sel = document.getElementById('langSelect'); if (sel) sel.value = lang;
 }
 
-// ==================== AUTH ====================
 function login() {
   if (data.siteMode === 'closed') { toast('Site şu anda kapalı.', 'error'); return; }
   const email = document.getElementById('loginEmail').value.trim();
@@ -775,7 +793,6 @@ function toggleSidebar() {
   else { sb.classList.add('-translate-x-full'); ov.classList.add('hidden'); }
 }
 
-// ==================== ADMIN ====================
 function openAdminLogin() { document.getElementById('adminLoginModal').classList.add('open'); }
 function adminLogin() {
   const u = document.getElementById('adminUser').value;
@@ -864,7 +881,6 @@ function adminDeleteOrder(id) {
   toast('Sipariş silindi', 'success');
 }
 
-// ==================== NAVIGATION ====================
 const pageTitles = {
   dashboard:'Dashboard', income:'Gelirler', expense:'Giderler', cashflow:'Nakit Akışı',
   budget:'Bütçe', debts:'Borçlar', receivables:'Alacaklar', calendar:'Ödeme Takvimi',
@@ -887,7 +903,6 @@ function showPage(name) {
   renderAll();
 }
 
-// ==================== FILTERS ====================
 function syncFilter(v) {
   document.getElementById('dateFilter').value = v;
   document.getElementById('dateFilterMobile').value = v;
@@ -907,7 +922,6 @@ function getDateRange() {
 function inRange(dateStr) { if (!dateStr) return false; const [s,e] = getDateRange(); const d = new Date(dateStr); return d >= s && d <= e; }
 function filtered(list) { return list.filter(x => inRange(x.date)); }
 
-// ==================== CALC ====================
 function calc() {
   const incomes = filtered(data.incomes), expenses = filtered(data.expenses);
   const totalIncome = incomes.reduce((s,x)=>s+Number(x.amount||0),0);
@@ -923,7 +937,6 @@ function calc() {
   return { totalIncome, totalExpense, totalDebt, totalDebtPayment, totalReceivable, totalAssets, totalInvestments, netCash, netWorth, savingsRate };
 }
 
-// ==================== FIRE ====================
 const FIRE_TYPES = {
   lean: { name: 'Lean FIRE', desc: 'Minimum yaşam, %50-70 gider', mult: 0.7, rate: 4 },
   regular: { name: 'Regular FIRE', desc: 'Mevcut yaşam standardı', mult: 1, rate: 4 },
@@ -949,7 +962,6 @@ function setFireType(t) {
   renderFire(); renderFireTypes();
 }
 
-// ==================== RENDER ====================
 function renderAll() {
   renderDashboard(); renderIncome(); renderExpense(); renderCashflow(); renderBudget();
   renderDebts(); renderReceivables(); renderCalendar(); renderAssets(); renderInvestments();
@@ -1151,7 +1163,6 @@ function renderFire() {
   });
 }
 
-// ==================== MARKET / PACKAGES ====================
 function renderMarket() {
   const grid = document.getElementById('marketGrid'); if (!grid) return;
   if (!data.marketProducts.length) { grid.innerHTML = '<p class="text-slate-400">Ürün yok.</p>'; return; }
@@ -1206,23 +1217,14 @@ function buyItem(type, id) {
   if (type === 'product') { const p = data.marketProducts.find(x => x.id === id); if (!p) return; itemName = p.name; price = p.price; }
   else if (type === 'package') { const p = data.userPackages.find(x => x.id === id); if (!p) return; itemName = 'Kullanıcı Paketi: ' + p.name; price = p.price; }
   else if (type === 'consulting') { const p = data.consultingPackages.find(x => x.id === id); if (!p) return; itemName = 'Danışmanlık: ' + p.name; price = p.price; }
-
   const msg = `Merhaba, ${itemName} (${fmt(price)}) hakkında bilgi almak ve satın almak istiyorum.`;
   const wa = `https://wa.me/9${CFO.phone}?text=${encodeURIComponent(msg)}`;
-
-  data.orders.push({
-    id: uid(), type, itemName, price,
-    customerName: data.user.name || '-',
-    customerPhone: data.user.phone || '',
-    note: 'WhatsApp üzerinden satın alma',
-    createdAt: new Date().toISOString(),
-  });
+  data.orders.push({ id: uid(), type, itemName, price, customerName: data.user.name || '-', customerPhone: data.user.phone || '', note: 'WhatsApp üzerinden satın alma', createdAt: new Date().toISOString() });
   saveData();
   window.open(wa, '_blank');
   toast('WhatsApp açılıyor...', 'success');
 }
 
-// ==================== CHARTS ====================
 function renderCharts(c) {
   if (!c) c = calc();
   const mk = (id, cfg) => { const el = document.getElementById(id); if (!el) return; if (charts[id]) charts[id].destroy(); charts[id] = new Chart(el, cfg); };
@@ -1253,7 +1255,6 @@ function renderCharts(c) {
   mk('chartNetWorthDetail', { type: 'line', data: { labels: ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu'], datasets: [{ label: 'Net Servet', data: [2100000,2180000,2250000,2320000,2400000,2480000,2550000,c.netWorth], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,.12)', fill: true, tension: .35, pointBackgroundColor: '#f59e0b', pointRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
 }
 
-// ==================== ALERTS & HEALTH ====================
 function renderAlerts(c) {
   const alerts = [];
   if (c.savingsRate < 20) alerts.push({ type:'warn', text:`Tasarruf oranınız %${c.savingsRate.toFixed(1)}. %20'nin altında.` });
@@ -1307,7 +1308,6 @@ function renderHealthScore(c) {
   }).join('');
 }
 
-// ==================== MODAL / CRUD ====================
 const modalFields = {
   income: [
     { name:'date', label:'Tarih', type:'date', required:true },
@@ -1402,7 +1402,6 @@ function deleteItem(key, id) {
   saveData(); renderAll(); toast('Kayıt silindi', 'success');
 }
 
-// ==================== EXCEL ====================
 function exportExcel() {
   const wb = XLSX.utils.book_new();
   const c = calc();
@@ -1433,7 +1432,6 @@ function exportExcel() {
   toast('Excel indirildi', 'success');
 }
 
-// ==================== REPORTS ====================
 function generateReport(type) {
   const c = calc();
   const el = document.getElementById('reportOutput'); if (!el) return;
@@ -1457,7 +1455,6 @@ function generateReport(type) {
   `;
 }
 
-// ==================== GEMINI AI ====================
 function saveGeminiKey() {
   const k = document.getElementById('geminiKey').value.trim();
   data.geminiKey = k; saveData();
@@ -1527,7 +1524,6 @@ async function runGemini(type) {
   } catch(e) { el.innerHTML = `<p class="text-red-500">Bağlantı hatası: ${esc(e.message)}</p>`; }
 }
 
-// ==================== SETTINGS ====================
 function loadSettings() {
   document.getElementById('setName').value = data.user.name || '';
   document.getElementById('setEmail').value = data.user.email || '';
@@ -1556,7 +1552,6 @@ function clearAllData() {
   toast('Tüm veriler silindi', 'success');
 }
 
-// ==================== TOAST ====================
 let toastTimer = null;
 function toast(msg, type = '') {
   const el = document.getElementById('toast'); if (!el) return;
@@ -1565,7 +1560,6 @@ function toast(msg, type = '') {
   toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
-// ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
   const m = document.getElementById('modal');
   if (m) m.addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
