@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ODAK Finans 360</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; margin: 0; }
+  .sidebar { background: #0f172a; }
+  .sidebar a { transition: all .15s; color: #cbd5e1; }
+  .sidebar a:hover { background: #1e293b; color: #f59e0b; }
+  .sidebar a.active { background: #1e293b; color: #f59e0b; border-left: 3px solid #f59e0b; }
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .stat-card { transition: transform .15s, box-shadow .15s; }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+  .btn { padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; }
+  .btn-primary { background: #0f172a; color: #fff; }
+  .btn-primary:hover { background: #1e293b; }
+  .btn-amber { background: #f59e0b; color: #fff; }
+  .btn-amber:hover { background: #d97706; }
+  .btn-outline { background: #fff; color: #334155; border: 1px solid #cbd5e1; }
+  .btn-outline:hover { background: #f8fafc; }
+  .btn-danger { background: #ef4444; color: #fff; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-green { background: #10b981; color: #fff; }
+  .btn-green:hover { background: #059669; }
+  .btn-whatsapp { background: #25D366; color: #fff; }
+  .btn-whatsapp:hover { background: #1da851; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.6); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
+  .modal-overlay.open { display: flex; }
+  .badge { padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; display: inline-block; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+  .badge-slate { background: #e2e8f0; color: #334155; }
+  .progress-bar { height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #10b981; transition: width .4s; border-radius: 999px; }
+  .progress-fill.warn { background: #f59e0b; }
+  .progress-fill.danger { background: #ef4444; }
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn .2s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 12px; font-size: 11px; text-transform: uppercase; color: #64748b; border-bottom: 1px solid #e2e8f0; font-weight: 700; letter-spacing: .5px; }
+  td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #334155; }
+  tr:hover td { background: #f8fafc; }
+  input, select, textarea { border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 12px; font-size: 14px; width: 100%; font-family: inherit; background: #fff; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.1); }
+  label { font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: .3px; }
+  .nav-section { padding: 14px 16px 6px; font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 800; letter-spacing: .8px; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #0f172a; color: #fff; padding: 14px 20px; border-radius: 10px; font-size: 14px; z-index: 200; opacity: 0; transform: translateY(20px); transition: all .3s; pointer-events: none; max-width: 90vw; }
+  .toast.show { opacity: 1; transform: none; }
+  .toast.success { background: #059669; }
+  .toast.error { background: #dc2626; }
+  .toast.warn { background: #d97706; }
+  .float-info { position: fixed; bottom: 20px; left: 20px; background: #0f172a; color: #fff; padding: 12px 16px; border-radius: 10px; font-size: 12px; z-index: 90; box-shadow: 0 4px 12px rgba(0,0,0,.2); max-width: 280px; }
+  .float-info strong { color: #f59e0b; }
+  .product-card { transition: all .2s; }
+  .product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.1); }
+  .lock-overlay { backdrop-filter: blur(6px); background: rgba(15,23,42,.75); }
+  @media print { .no-print { display: none !important; } .card { box-shadow: none; border: 1px solid #e2e8f0; } }
+</style>
+</head>
+<body>
+
+<!-- ==================== LOGIN ==================== -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+  <div class="card p-8 w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="text-5xl mb-3">💎</div>
+      <h1 class="text-3xl font-bold text-slate-800">ODAK <span class="text-amber-500">Finans 360</span></h1>
+      <p class="text-slate-500 text-sm mt-2" data-i18n="tagline">Kişisel Finans Yönetim Platformu</p>
+    </div>
+
+    <div id="loginForm">
+      <div class="space-y-4">
+        <div>
+          <label data-i18n="email">E-posta</label>
+          <input type="email" id="loginEmail" value="demo@odak.com">
+        </div>
+        <div>
+          <label data-i18n="password">Şifre</label>
+          <input type="password" id="loginPassword" value="demo123">
+        </div>
+        <button onclick="login()" class="btn btn-primary w-full py-3" data-i18n="login">Giriş Yap</button>
+        <button onclick="showRegister()" class="btn btn-outline w-full py-3" data-i18n="register">Yeni Hesap Oluştur</button>
+        <p class="text-xs text-center text-slate-400 pt-2">Demo: demo@odak.com / demo123</p>
+      </div>
+    </div>
+
+    <div id="registerForm" class="hidden">
+      <div class="space-y-4">
+        <div><label data-i18n="fullname">Ad Soyad</label><input type="text" id="regName"></div>
+        <div><label data-i18n="email">E-posta</label><input type="email" id="regEmail"></div>
+        <div><label data-i18n="password">Şifre</label><input type="password" id="regPassword"></div>
+        <button onclick="register()" class="btn btn-primary w-full py-3" data-i18n="registerBtn">Kayıt Ol</button>
+        <button onclick="showLogin()" class="btn btn-outline w-full py-3">← <span data-i18n="backToLogin">Girişe Dön</span></button>
+      </div>
+    </div>
+
+    <div class="mt-6 pt-4 border-t border-slate-100 flex justify-center gap-2 text-xs">
+      <button onclick="setLang('tr')" class="px-3 py-1 rounded border border-slate-200 hover:bg-slate-50">🇹🇷 TR</button>
+      <button onclick="setLang('en')" class="px-3 py-1 rounded border border-slate-200 hover:bg-slate-50">🇬🇧 EN</button>
+      <button onclick="openAdminLogin()" class="px-3 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50">🔒 Admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== APP ==================== -->
+<div id="app" class="hidden min-h-screen">
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar w-64 min-h-screen text-slate-300 fixed top-0 left-0 z-40 -translate-x-full md:translate-x-0 transition-transform overflow-y-auto no-print">
+    <div class="p-5 border-b border-slate-700">
+      <h1 class="text-xl font-bold text-white">ODAK <span class="text-amber-500">360</span></h1>
+      <p class="text-xs text-slate-400 mt-1" id="userGreeting">Hoş geldiniz</p>
+      <div class="mt-2 text-xs">
+        <span id="userPlanBadge" class="badge badge-amber">FREE</span>
+      </div>
+    </div>
+
+    <nav class="pb-8">
+      <a href="#" onclick="showPage('dashboard')" class="nav-link active flex items-center gap-3 px-5 py-2.5 text-sm" data-page="dashboard">📊 <span data-i18n="navDashboard">Dashboard</span></a>
+
+      <div class="nav-section" data-i18n="navFinance">Finans</div>
+      <a href="#" onclick="showPage('income')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="income">💰 <span data-i18n="navIncome">Gelirler</span></a>
+      <a href="#" onclick="showPage('expense')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="expense">💸 <span data-i18n="navExpense">Giderler</span></a>
+      <a href="#" onclick="showPage('cashflow')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="cashflow">🔄 <span data-i18n="navCashflow">Nakit Akışı</span></a>
+      <a href="#" onclick="showPage('budget')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="budget">📋 <span data-i18n="navBudget">Bütçe</span></a>
+
+      <div class="nav-section" data-i18n="navDebt">Borç & Alacak</div>
+      <a href="#" onclick="showPage('debts')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="debts">🏦 <span data-i18n="navDebts">Borçlar</span></a>
+      <a href="#" onclick="showPage('receivables')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="receivables">📥 <span data-i18n="navReceivables">Alacaklar</span></a>
+      <a href="#" onclick="showPage('calendar')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="calendar">📅 <span data-i18n="navCalendar">Ödeme Takvimi</span></a>
+
+      <div class="nav-section" data-i18n="navAsset">Varlık & Yatırım</div>
+      <a href="#" onclick="showPage('assets')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="assets">🏠 <span data-i18n="navAssets">Varlıklar</span></a>
+      <a href="#" onclick="showPage('investments')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="investments">📈 <span data-i18n="navInvestments">Yatırımlar</span></a>
+      <a href="#" onclick="showPage('networth')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="networth">💎 <span data-i18n="navNetworth">Net Servet</span></a>
+
+      <div class="nav-section" data-i18n="navPlanning">Planlama</div>
+      <a href="#" onclick="showPage('goals')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="goals">🎯 <span data-i18n="navGoals">Hedefler</span></a>
+      <a href="#" onclick="showPage('emergency')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="emergency">🛡️ <span data-i18n="navEmergency">Acil Fon</span></a>
+      <a href="#" onclick="showPage('plan12')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="plan12">📆 <span data-i18n="navPlan12">12 Aylık Plan</span></a>
+      <a href="#" onclick="showPage('fire')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="fire">🔥 <span data-i18n="navFire">FIRE</span></a>
+
+      <div class="nav-section" data-i18n="navMarket">Market & Paketler</div>
+      <a href="#" onclick="showPage('market')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="market">🛒 <span data-i18n="navMarket">Market (12 Ürün)</span></a>
+      <a href="#" onclick="showPage('packages')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="packages">📦 <span data-i18n="navPackages">Kullanıcı Paketleri</span></a>
+      <a href="#" onclick="showPage('consulting')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="consulting">💼 <span data-i18n="navConsulting">Danışmanlık</span></a>
+
+      <div class="nav-section" data-i18n="navOther">Diğer</div>
+      <a href="#" onclick="showPage('reports')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="reports">📄 <span data-i18n="navReports">Raporlar</span></a>
+      <a href="#" onclick="showPage('ai')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="ai">🤖 <span data-i18n="navAi">AI Asistan (Gemini)</span></a>
+      <a href="#" onclick="showPage('settings')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="settings">⚙️ <span data-i18n="navSettings">Ayarlar</span></a>
+      <a href="#" onclick="logout()" class="flex items-center gap-3 px-5 py-2.5 text-sm text-red-400 hover:bg-red-900/20">🚪 <span data-i18n="navLogout">Çıkış</span></a>
+    </nav>
+  </aside>
+
+  <div id="sidebarOverlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black/50 z-30 md:hidden"></div>
+
+  <!-- MAIN -->
+  <main class="md:ml-64 min-h-screen flex flex-col">
+    <header class="bg-white border-b border-slate-200 px-4 md:px-6 py-4 flex items-center justify-between sticky top-0 z-20 no-print">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar()" class="md:hidden text-2xl text-slate-700">☰</button>
+        <h2 id="pageTitle" class="text-lg md:text-xl font-bold text-slate-800">Dashboard</h2>
+      </div>
+      <div class="flex items-center gap-2 md:gap-3">
+        <select id="langSelect" onchange="setLang(this.value)" class="text-sm w-auto">
+          <option value="tr">🇹🇷 TR</option>
+          <option value="en">🇬🇧 EN</option>
+        </select>
+        <select id="dateFilter" onchange="renderAll()" class="text-sm w-auto hidden sm:block">
+          <option value="thisMonth">Bu Ay</option>
+          <option value="lastMonth">Geçen Ay</option>
+          <option value="last3">Son 3 Ay</option>
+          <option value="last6">Son 6 Ay</option>
+          <option value="thisYear">Bu Yıl</option>
+          <option value="lastYear">Geçen Yıl</option>
+          <option value="all">Tümü</option>
+        </select>
+        <button onclick="exportExcel()" class="btn btn-amber text-xs md:text-sm">📥 Excel</button>
+      </div>
+    </header>
+
+    <div class="p-4 md:p-6 flex-1">
+
+      <!-- ============ DASHBOARD ============ -->
+      <div id="page-dashboard" class="page active">
+        <div class="mb-5">
+          <h3 class="text-lg font-bold text-slate-800">Finansal Durumunuz</h3>
+          <p class="text-sm text-slate-500" id="dashPeriod"></p>
+        </div>
+
+        <div class="sm:hidden mb-4">
+          <select id="dateFilterMobile" onchange="syncFilter(this.value)" class="text-sm">
+            <option value="thisMonth">Bu Ay</option>
+            <option value="lastMonth">Geçen Ay</option>
+            <option value="last3">Son 3 Ay</option>
+            <option value="last6">Son 6 Ay</option>
+            <option value="thisYear">Bu Yıl</option>
+            <option value="lastYear">Geçen Yıl</option>
+            <option value="all">Tümü</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4">
+          <div class="card stat-card p-4 md:p-5"><p class="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Toplam Varlık</p><p class="text-lg md:text-2xl font-bold text-slate-800 mt-2" id="dashAssets">₺0</p></div>
+          <div class="card stat-card p-4 md:p-5"><p class="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Toplam Borç</p><p class="text-lg md:text-2xl font-bold text-red-500 mt-2" id="dashDebts">₺0</p></div>
+          <div class="card stat-card p-4 md:p-5"><p class="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Toplam Alacak</p><p class="text-lg md:text-2xl font-bold text-green-600 mt-2" id="dashReceivables">₺0</p></div>
+          <div class="card stat-card p-4 md:p-5 bg-gradient-to-br from-slate-800 to-slate-900 text-white"><p class="text-[10px] md:text-xs text-amber-400 font-bold uppercase">Net Servet</p><p class="text-lg md:text-2xl font-bold mt-2" id="dashNetWorth">₺0</p></div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4">
+          <div class="card p-4 md:p-5"><p class="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Aylık Gelir</p><p class="text-base md:text-xl font-bold text-green-600 mt-2" id="dashIncome">₺0</p></div>
+          <div class="card p-4 md:p-5"><p class="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Aylık Gider</p><p class="text-base md:text-xl font-bold text-red-500 mt-2" id="dashExpense">₺0</p></div>
+          <div class="card p-4 md:p-5"><p class="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Net Nakit Akışı</p><p class="text-base md:text-xl font-bold text-slate-800 mt-2" id="dashCashflow">₺0</p></div>
+          <div class="card p-4 md:p-5"><p class="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Tasarruf Oranı</p><p class="text-base md:text-xl font-bold text-amber-500 mt-2" id="dashSavingsRate">%0</p></div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+          <div class="card p-4 md:p-5"><p class="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Acil Fon</p><p class="text-sm md:text-lg font-bold mt-2" id="dashEmergency">₺0</p><div class="progress-bar mt-2"><div class="progress-fill" id="dashEmergencyBar" style="width:0%"></div></div></div>
+          <div class="card p-4 md:p-5"><p class="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Yatırım Portföyü</p><p class="text-sm md:text-lg font-bold text-slate-800 mt-2" id="dashInvestments">₺0</p></div>
+          <div class="card p-4 md:p-5"><p class="text-[10px] md:text-xs text-slate-500 font-bold uppercase">FIRE İlerlemesi</p><p class="text-sm md:text-lg font-bold text-slate-800 mt-2" id="dashFire">%0</p><div class="progress-bar mt-2"><div class="progress-fill warn" id="dashFireBar" style="width:0%"></div></div></div>
+          <div class="card p-4 md:p-5"><p class="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Aylık Borç Ödemesi</p><p class="text-sm md:text-lg font-bold text-red-500 mt-2" id="dashDebtPayment">₺0</p></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
+          <div class="card p-4 md:p-5"><h4 class="font-bold text-slate-800 mb-4">Gelir - Gider</h4><div style="height:220px"><canvas id="chartIncomeExpense"></canvas></div></div>
+          <div class="card p-4 md:p-5"><h4 class="font-bold text-slate-800 mb-4">Gider Dağılımı</h4><div style="height:220px"><canvas id="chartExpensePie"></canvas></div></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
+          <div class="card p-4 md:p-5"><h4 class="font-bold text-slate-800 mb-4">Net Servet Trendi</h4><div style="height:220px"><canvas id="chartNetWorth"></canvas></div></div>
+          <div class="card p-4 md:p-5"><h4 class="font-bold text-slate-800 mb-4">Nakit Akışı (12 Ay)</h4><div style="height:220px"><canvas id="chartCashflow"></canvas></div></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
+          <div class="card p-4 md:p-5"><h4 class="font-bold text-slate-800 mb-4">💡 Akıllı Uyarılar</h4><div id="smartAlerts" class="space-y-2"></div></div>
+          <div class="card p-4 md:p-5"><h4 class="font-bold text-slate-800 mb-4">❤️ Finansal Sağlık Skoru</h4>
+            <div class="flex items-center gap-4 flex-wrap">
+              <div class="text-center"><div class="text-5xl font-bold text-amber-500" id="healthScore">0</div><div class="text-xs text-slate-500 font-semibold">/ 100</div></div>
+              <div class="flex-1 min-w-[180px] space-y-2" id="healthBreakdown"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ INCOME ============ -->
+      <div id="page-income" class="page">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="text-lg font-bold text-slate-800">Gelirler</h3>
+          <button onclick="openModal('income')" class="btn btn-primary">+ Yeni Gelir</button>
+        </div>
+        <div class="card overflow-x-auto"><table><thead><tr><th>Tarih</th><th>Kategori</th><th>Açıklama</th><th>Hesap</th><th class="text-right">Tutar</th><th>İşlem</th></tr></thead><tbody id="incomeTable"></tbody></table></div>
+      </div>
+
+      <!-- ============ EXPENSE ============ -->
+      <div id="page-expense" class="page">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="text-lg font-bold text-slate-800">Giderler</h3>
+          <button onclick="openModal('expense')" class="btn btn-primary">+ Yeni Gider</button>
+        </div>
+        <div class="card overflow-x-auto"><table><thead><tr><th>Tarih</th><th>Kategori</th><th>Açıklama</th><th>Tip</th><th class="text-right">Tutar</th><th>İşlem</th></tr></thead><tbody id="expenseTable"></tbody></table></div>
+      </div>
+
+      <!-- ============ CASHFLOW ============ -->
+      <div id="page-cashflow" class="page">
+        <h3 class="text-lg font-bold text-slate-800 mb-5">Nakit Akışı</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Toplam Gelir</p><p class="text-2xl font-bold text-green-600 mt-2" id="cfIncome">₺0</p></div>
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Toplam Gider</p><p class="text-2xl font-bold text-red-500 mt-2" id="cfExpense">₺0</p></div>
+          <div class="card p-5 bg-slate-800 text-white"><p class="text-xs text-amber-400 uppercase font-bold">Net Nakit Akışı</p><p class="text-2xl font-bold mt-2" id="cfNet">₺0</p></div>
+        </div>
+        <div class="card p-5"><div style="height:320px"><canvas id="chartCashflowDetail"></canvas></div></div>
+      </div>
+
+      <!-- ============ BUDGET ============ -->
+      <div id="page-budget" class="page">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="text-lg font-bold text-slate-800">Bütçe</h3>
+          <button onclick="openModal('budget')" class="btn btn-primary">+ Bütçe Ekle</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="budgetGrid"></div>
+      </div>
+
+      <!-- ============ DEBTS ============ -->
+      <div id="page-debts" class="page">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="text-lg font-bold text-slate-800">Borçlar</h3>
+          <button onclick="openModal('debt')" class="btn btn-primary">+ Yeni Borç</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Toplam Borç</p><p class="text-2xl font-bold text-red-500 mt-2" id="debtTotal">₺0</p></div>
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Ödenen</p><p class="text-2xl font-bold text-green-600 mt-2" id="debtPaid">₺0</p></div>
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Kalan</p><p class="text-2xl font-bold text-slate-800 mt-2" id="debtRemaining">₺0</p></div>
+        </div>
+        <div class="card overflow-x-auto"><table><thead><tr><th>Borç Adı</th><th>Alacaklı</th><th>Tür</th><th class="text-right">Toplam</th><th class="text-right">Kalan</th><th class="text-right">Aylık</th><th>Vade</th><th>İşlem</th></tr></thead><tbody id="debtTable"></tbody></table></div>
+      </div>
+
+      <!-- ============ RECEIVABLES ============ -->
+      <div id="page-receivables" class="page">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="text-lg font-bold text-slate-800">Alacaklar</h3>
+          <button onclick="openModal('receivable')" class="btn btn-primary">+ Yeni Alacak</button>
+        </div>
+        <div class="card overflow-x-auto"><table><thead><tr><th>Borçlu</th><th>Açıklama</th><th class="text-right">Toplam</th><th class="text-right">Tahsil</th><th class="text-right">Kalan</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="receivableTable"></tbody></table></div>
+      </div>
+
+      <!-- ============ CALENDAR ============ -->
+      <div id="page-calendar" class="page">
+        <h3 class="text-lg font-bold text-slate-800 mb-5">Ödeme Takvimi</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Bugün</p><div id="calToday" class="mt-3 space-y-2"></div></div>
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">7 Gün İçinde</p><div id="cal7" class="mt-3 space-y-2"></div></div>
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">30 Gün İçinde</p><div id="cal30" class="mt-3 space-y-2"></div></div>
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">60 Gün İçinde</p><div id="cal60" class="mt-3 space-y-2"></div></div>
+        </div>
+      </div>
+
+      <!-- ============ ASSETS ============ -->
+      <div id="page-assets" class="page">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="text-lg font-bold text-slate-800">Varlıklar</h3>
+          <button onclick="openModal('asset')" class="btn btn-primary">+ Yeni Varlık</button>
+        </div>
+        <div class="card p-5 mb-5"><p class="text-xs text-slate-500 uppercase font-bold">Toplam Varlık Değeri</p><p class="text-3xl font-bold text-slate-800 mt-2" id="assetTotal">₺0</p></div>
+        <div class="card overflow-x-auto"><table><thead><tr><th>Varlık</th><th>Kategori</th><th class="text-right">Adet</th><th class="text-right">Birim Değer</th><th class="text-right">Toplam Değer</th><th>İşlem</th></tr></thead><tbody id="assetTable"></tbody></table></div>
+      </div>
+
+      <!-- ============ INVESTMENTS ============ -->
+      <div id="page-investments" class="page">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="text-lg font-bold text-slate-800">Yatırım Portföyü</h3>
+          <button onclick="openModal('investment')" class="btn btn-primary">+ Yeni Yatırım</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Toplam Yatırım</p><p class="text-2xl font-bold text-slate-800 mt-2" id="invTotal">₺0</p></div>
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Kar/Zarar</p><p class="text-2xl font-bold mt-2" id="invPL">₺0</p></div>
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Getiri</p><p class="text-2xl font-bold mt-2" id="invReturn">%0</p></div>
+        </div>
+        <div class="card p-5"><div style="height:280px"><canvas id="chartPortfolio"></canvas></div></div>
+        <div class="card overflow-x-auto mt-5"><table><thead><tr><th>Yatırım</th><th>Kategori</th><th class="text-right">Maliyet</th><th class="text-right">Güncel Değer</th><th class="text-right">Kar/Zarar</th><th>İşlem</th></tr></thead><tbody id="investmentTable"></tbody></table></div>
+      </div>
+
+      <!-- ============ NETWORTH ============ -->
+      <div id="page-networth" class="page">
+        <h3 class="text-lg font-bold text-slate-800 mb-5">Net Servet</h3>
+        <div class="card p-6 mb-5 bg-gradient-to-br from-slate-800 to-slate-900 text-white">
+          <p class="text-xs text-amber-400 uppercase font-bold">Net Servet</p>
+          <p class="text-4xl font-bold mt-2" id="nwTotal">₺0</p>
+          <p class="text-xs text-slate-400 mt-3">Toplam Varlık + Alacak - Borç</p>
+        </div>
+        <div class="card p-5"><div style="height:320px"><canvas id="chartNetWorthDetail"></canvas></div></div>
+      </div>
+
+      <!-- ============ GOALS ============ -->
+      <div id="page-goals" class="page">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="text-lg font-bold text-slate-800">Finansal Hedefler</h3>
+          <button onclick="openModal('goal')" class="btn btn-primary">+ Yeni Hedef</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="goalsGrid"></div>
+      </div>
+
+      <!-- ============ EMERGENCY ============ -->
+      <div id="page-emergency" class="page">
+        <h3 class="text-lg font-bold text-slate-800 mb-5">Acil Durum Fonu</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+          <div class="card p-5"><label>Aylık Zorunlu Gider (₺)</label><input type="number" id="emMonthly" onchange="renderEmergency()"></div>
+          <div class="card p-5"><label>Mevcut Acil Fon (₺)</label><input type="number" id="emCurrent" onchange="renderEmergency()"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="emGrid"></div>
+      </div>
+
+      <!-- ============ PLAN12 ============ -->
+      <div id="page-plan12" class="page">
+        <h3 class="text-lg font-bold text-slate-800 mb-5">12 Aylık Finansal Plan</h3>
+        <div class="card overflow-x-auto"><table><thead><tr><th>Ay</th><th class="text-right">Gelir Hedefi</th><th class="text-right">Gider Bütçesi</th><th class="text-right">Borç Ödemesi</th><th class="text-right">Yatırım</th><th class="text-right">Tasarruf</th></tr></thead><tbody id="plan12Table"></tbody></table></div>
+      </div>
+
+      <!-- ============ FIRE ============ -->
+      <div id="page-fire" class="page">
+        <h3 class="text-lg font-bold text-slate-800 mb-5">🔥 FIRE - Finansal Özgürlük</h3>
+
+        <!-- FIRE Type Selector -->
+        <div class="card p-5 mb-5">
+          <label>FIRE Çeşidi</label>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2" id="fireTypeGrid"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+          <div class="card p-5"><label>Aylık Yaşam Gideri (₺)</label><input type="number" id="fireMonthly" onchange="renderFire()"></div>
+          <div class="card p-5"><label>Güvenli Çekim Oranı (%)</label><input type="number" id="fireRate" onchange="renderFire()"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
+          <div class="card p-5 bg-slate-800 text-white"><p class="text-xs text-amber-400 uppercase font-bold">FIRE Hedefi</p><p class="text-xl font-bold mt-2" id="fireTarget">₺0</p></div>
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Mevcut Yatırım</p><p class="text-xl font-bold text-slate-800 mt-2" id="fireCurrent">₺0</p></div>
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">İlerleme</p><p class="text-xl font-bold text-amber-500 mt-2" id="fireProgress">%0</p></div>
+          <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Tahmini FIRE Yılı</p><p class="text-xl font-bold text-green-600 mt-2" id="fireYear">-</p></div>
+        </div>
+        <div class="card p-5"><div style="height:300px"><canvas id="chartFire"></canvas></div></div>
+        <p class="text-xs text-slate-400 mt-3">⚠️ Bu hesap finansal eğitim amaçlı bir tahmindir. Yatırım tavsiyesi değildir.</p>
+      </div>
+
+      <!-- ============ MARKET ============ -->
+      <div id="page-market" class="page">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="text-lg font-bold text-slate-800">🛒 Market — 12 Dijital Ürün</h3>
+          <button onclick="openModal('product')" class="btn btn-primary">+ Ürün Ekle</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="marketGrid"></div>
+      </div>
+
+      <!-- ============ PACKAGES ============ -->
+      <div id="page-packages" class="page">
+        <h3 class="text-lg font-bold text-slate-800 mb-5">📦 Kullanıcı Paketleri</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="userPackagesGrid"></div>
+      </div>
+
+      <!-- ============ CONSULTING ============ -->
+      <div id="page-consulting" class="page">
+        <h3 class="text-lg font-bold text-slate-800 mb-5">💼 Danışmanlık Paketleri</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="consultingGrid"></div>
+      </div>
+
+      <!-- ============ REPORTS ============ -->
+      <div id="page-reports" class="page">
+        <h3 class="text-lg font-bold text-slate-800 mb-5">Raporlar</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <div class="card p-6 text-center"><div class="text-4xl mb-3">📊</div><h4 class="font-bold text-slate-800 mb-2">Aylık Rapor</h4><p class="text-xs text-slate-500 mb-4">Bu ayın finansal özeti</p><button onclick="generateReport('monthly')" class="btn btn-primary w-full">Oluştur</button></div>
+          <div class="card p-6 text-center"><div class="text-4xl mb-3">📈</div><h4 class="font-bold text-slate-800 mb-2">Yıllık Rapor</h4><p class="text-xs text-slate-500 mb-4">Yıllık finansal analiz</p><button onclick="generateReport('yearly')" class="btn btn-primary w-full">Oluştur</button></div>
+          <div class="card p-6 text-center"><div class="text-4xl mb-3">📥</div><h4 class="font-bold text-slate-800 mb-2">Excel Export</h4><p class="text-xs text-slate-500 mb-4">Tüm verileri Excel'e aktar</p><button onclick="exportExcel()" class="btn btn-amber w-full">İndir</button></div>
+        </div>
+        <div class="card p-5" id="reportOutput"></div>
+      </div>
+
+      <!-- ============ AI (GEMINI) ============ -->
+      <div id="page-ai" class="page">
+        <h3 class="text-lg font-bold text-slate-800 mb-5">🤖 AI Finans Asistanı (Gemini)</h3>
+
+        <div class="card p-5 mb-5">
+          <label>Google Gemini API Anahtarı</label>
+          <input type="password" id="geminiKey" placeholder="AIza...">
+          <p class="text-xs text-slate-500 mt-2">
+            Anahtarınızı <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-amber-600 underline">Google AI Studio</a>'dan ücretsiz alabilirsiniz.
+            Anahtar yalnızca tarayıcınızda saklanır, sunucuya gönderilmez.
+          </p>
+          <div class="flex gap-2 mt-3">
+            <button onclick="saveGeminiKey()" class="btn btn-primary">Anahtarı Kaydet</button>
+            <button onclick="testGemini()" class="btn btn-outline">Bağlantıyı Test Et</button>
+          </div>
+        </div>
+
+        <div class="card p-5 mb-5">
+          <p class="text-sm text-slate-600 mb-4">Finansal verilerinizi Gemini AI ile analiz ettirin ve kişiselleştirilmiş öneriler alın.</p>
+          <div class="flex gap-2 flex-wrap">
+            <button onclick="runGemini('summary')" class="btn btn-primary">📊 Genel Özet</button>
+            <button onclick="runGemini('advice')" class="btn btn-amber">💡 Öneriler</button>
+            <button onclick="runGemini('budget')" class="btn btn-outline">📋 Bütçe Analizi</button>
+            <button onclick="runGemini('fire')" class="btn btn-outline">🔥 FIRE Analizi</button>
+            <button onclick="runGemini('debt')" class="btn btn-outline">🏦 Borç Stratejisi</button>
+          </div>
+        </div>
+
+        <div class="card p-5" id="aiOutput">
+          <p class="text-sm text-slate-400">Analiz için yukarıdaki butonlardan birine tıklayın.</p>
+        </div>
+        <p class="text-xs text-slate-400 mt-3">⚠️ AI kesin yatırım tavsiyesi vermez. Finansal kararlarınızı kendiniz verirsiniz.</p>
+      </div>
+
+      <!-- ============ SETTINGS ============ -->
+      <div id="page-settings" class="page">
+        <h3 class="text-lg font-bold text-slate-800 mb-5">Ayarlar</h3>
+        <div class="card p-6 max-w-2xl">
+          <div class="space-y-4">
+            <div><label>Ad Soyad</label><input type="text" id="setName"></div>
+            <div><label>E-posta</label><input type="email" id="setEmail"></div>
+            <div><label>Telefon</label><input type="tel" id="setPhone"></div>
+            <div><label>Para Birimi</label><select id="setCurrency"><option>TRY</option><option>USD</option><option>EUR</option><option>GBP</option></select></div>
+            <div><label>Aylık Gelir Hedefi (₺)</label><input type="number" id="setIncomeGoal"></div>
+            <div><label>Aylık Gider Bütçesi (₺)</label><input type="number" id="setExpenseBudget"></div>
+            <div class="flex gap-3 pt-3">
+              <button onclick="saveSettings()" class="btn btn-primary flex-1">Kaydet</button>
+              <button onclick="clearAllData()" class="btn btn-danger">Tüm Verileri Sil</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-slate-900 text-slate-300 px-6 py-6 mt-6 no-print">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div>
+          <h4 class="font-bold text-white mb-2">💎 ODAK Finans 360</h4>
+          <p class="text-xs text-slate-400">Kişisel finans, gelir-gider, borç-alacak ve finansal özgürlük yönetim platformu.</p>
+        </div>
+        <div>
+          <h4 class="font-bold text-white mb-2">📞 İletişim</h4>
+          <p class="text-xs"><strong>CFO:</strong> Orhan Boyraz</p>
+          <p class="text-xs"><strong>Tel:</strong> <a href="tel:+905409666602" class="text-amber-400 hover:underline">0540 966 66 02</a></p>
+          <p class="text-xs"><strong>Adres:</strong> Bursa / Türkiye</p>
+          <p class="text-xs mt-2">
+            <a href="https://wa.me/905409666602" target="_blank" class="inline-flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">💬 WhatsApp</a>
+          </p>
+        </div>
+        <div>
+          <h4 class="font-bold text-white mb-2">ℹ️ Bilgi</h4>
+          <p class="text-xs text-slate-400">© <span id="footerYear"></span> ODAK Finans 360. Tüm hakları saklıdır.</p>
+          <p class="text-xs text-slate-400 mt-2">Verileriniz tarayıcınızda saklanır.</p>
+        </div>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<!-- ==================== MODAL ==================== -->
+<div id="modal" class="modal-overlay">
+  <div class="card p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-5">
+      <h3 id="modalTitle" class="text-lg font-bold text-slate-800">Yeni Kayıt</h3>
+      <button onclick="closeModal()" class="text-2xl text-slate-400 hover:text-slate-600 leading-none">&times;</button>
+    </div>
+    <form id="modalForm" onsubmit="saveModal(event)" class="space-y-4"></form>
+  </div>
+</div>
+
+<!-- ==================== ADMIN LOGIN ==================== -->
+<div id="adminLoginModal" class="modal-overlay">
+  <div class="card p-6 w-full max-w-sm">
+    <h3 class="text-lg font-bold text-slate-800 mb-4">🔒 Admin Girişi</h3>
+    <div class="space-y-4">
+      <div><label>Kullanıcı Adı</label><input type="text" id="adminUser" value="admin"></div>
+      <div><label>Şifre</label><input type="password" id="adminPass" placeholder="Şifre"></div>
+      <div class="flex gap-2">
+        <button onclick="adminLogin()" class="btn btn-primary flex-1">Giriş</button>
+        <button onclick="document.getElementById('adminLoginModal').classList.remove('open')" class="btn btn-outline">İptal</button>
+      </div>
+      <p class="text-xs text-slate-400 text-center">Varsayılan: admin / odak2026</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ADMIN PANEL ==================== -->
+<div id="adminPanel" class="hidden min-h-screen bg-slate-100">
+  <header class="bg-red-900 text-white px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">🔒</span>
+      <div>
+        <h1 class="text-lg font-bold">ODAK Finans 360 — Yönetim Paneli</h1>
+        <p class="text-xs text-red-200">Şifreli erişim · admin@odak.com</p>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="toggleSiteMode()" id="siteModeBtn" class="btn bg-amber-500 hover:bg-amber-600 text-white">🟢 Site: Açık</button>
+      <button onclick="adminLogout()" class="btn btn-outline bg-white/10 text-white border-white/30">Çıkış</button>
+    </div>
+  </header>
+
+  <div class="p-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Toplam Kullanıcı</p><p class="text-2xl font-bold text-slate-800 mt-2" id="admUsers">0</p></div>
+      <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Aktif Abonelik</p><p class="text-2xl font-bold text-green-600 mt-2" id="admSubs">0</p></div>
+      <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Market Ürünü</p><p class="text-2xl font-bold text-amber-600 mt-2" id="admProducts">0</p></div>
+      <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Bekleyen Sipariş</p><p class="text-2xl font-bold text-red-500 mt-2" id="admOrders">0</p></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div class="card p-5">
+        <h3 class="font-bold text-slate-800 mb-4">📦 Market Ürünleri (Ekle/Sil)</h3>
+        <div class="mb-3 flex gap-2">
+          <input type="text" id="admProdName" placeholder="Ürün adı" class="flex-1">
+          <input type="number" id="admProdPrice" placeholder="Fiyat ₺" class="w-32">
+          <button onclick="adminAddProduct()" class="btn btn-green">+ Ekle</button>
+        </div>
+        <div id="admProductList" class="space-y-2 max-h-80 overflow-y-auto"></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-bold text-slate-800 mb-4">👥 Kayıtlı Kullanıcılar</h3>
+        <div id="admUserList" class="space-y-2 max-h-80 overflow-y-auto"></div>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <h3 class="font-bold text-slate-800 mb-4">📋 Siparişler / İletişim Talepleri (WhatsApp)</h3>
+      <div id="admOrderList" class="space-y-2 max-h-96 overflow-y-auto"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- FLOATING INFO - CFO Contact -->
+<div class="float-info no-print" id="floatInfo">
+  <div class="flex items-start gap-2">
+    <span class="text-lg">💼</span>
+    <div>
+      <div class="font-bold text-white text-xs">CFO: Orhan Boyraz</div>
+      <div class="text-[11px] text-slate-300">Tel: <a href="tel:+905409666602" class="text-amber-400">0540 966 66 02</a></div>
+      <div class="text-[11px] text-slate-300">📍 Bursa / Türkiye</div>
+      <a href="https://wa.me/905409666602" target="_blank" class="inline-block mt-1 bg-green-600 hover:bg-green-700 text-white px-2 py-0.5 rounded text-[10px] font-semibold">💬 WhatsApp</a>
+    </div>
+    <button onclick="document.getElementById('floatInfo').style.display='none'" class="text-slate-400 hover:text-white text-xs">×</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ODAK Finans 360 — v3
+   Tüm özellikler tek dosyada.
+   ============================================================ */
+
+// ==================== TRANSLATIONS ====================
+const I18N = {
+  tr: {
+    tagline:'Kişisel Finans Yönetim Platformu', email:'E-posta', password:'Şifre', login:'Giriş Yap',
+    register:'Yeni Hesap Oluştur', registerBtn:'Kayıt Ol', fullname:'Ad Soyad', backToLogin:'Girişe Dön',
+    navDashboard:'Dashboard', navFinance:'Finans', navIncome:'Gelirler', navExpense:'Giderler',
+    navCashflow:'Nakit Akışı', navBudget:'Bütçe', navDebt:'Borç & Alacak', navDebts:'Borçlar',
+    navReceivables:'Alacaklar', navCalendar:'Ödeme Takvimi', navAsset:'Varlık & Yatırım',
+    navAssets:'Varlıklar', navInvestments:'Yatırımlar', navNetworth:'Net Servet',
+    navPlanning:'Planlama', navGoals:'Hedefler', navEmergency:'Acil Fon', navPlan12:'12 Aylık Plan',
+    navFire:'FIRE', navMarket:'Market & Paketler', navPackages:'Kullanıcı Paketleri',
+    navConsulting:'Danışmanlık', navOther:'Diğer', navReports:'Raporlar', navAi:'AI Asistan (Gemini)',
+    navSettings:'Ayarlar', navLogout:'Çıkış'
+  },
+  en: {
+    tagline:'Personal Finance Management Platform', email:'Email', password:'Password', login:'Sign In',
+    register:'Create New Account', registerBtn:'Register', fullname:'Full Name', backToLogin:'Back to Login',
+    navDashboard:'Dashboard', navFinance:'Finance', navIncome:'Income', navExpense:'Expenses',
+    navCashflow:'Cash Flow', navBudget:'Budget', navDebt:'Debt & Receivables', navDebts:'Debts',
+    navReceivables:'Receivables', navCalendar:'Payment Calendar', navAsset:'Assets & Investment',
+    navAssets:'Assets', navInvestments:'Investments', navNetworth:'Net Worth',
+    navPlanning:'Planning', navGoals:'Goals', navEmergency:'Emergency Fund', navPlan12:'12 Month Plan',
+    navFire:'FIRE', navMarket:'Market & Packages', navPackages:'User Packages',
+    navConsulting:'Consulting', navOther:'Other', navReports:'Reports', navAi:'AI Assistant (Gemini)',
+    navSettings:'Settings', navLogout:'Logout'
+  }
+};
+
+// ==================== DATA ====================
+const STORAGE_KEY = 'odak_finans_360_v3';
+const ADMIN_CREDS = { user: 'admin', pass: 'odak2026' };
+const CFO = { name: 'Orhan Boyraz', phone: '05409666602', phoneDisplay: '0540 966 66 02', address: 'Bursa / Türkiye' };
+
+function isoDate(monthOffset, day) {
+  const d = new Date(); d.setMonth(d.getMonth() - monthOffset); d.setDate(day);
+  return d.toISOString().slice(0,10);
+}
+
+const DEFAULT_MARKET_PRODUCTS = [
+  { id: 1, name: 'Finansal Özgürlük E-Kitabı', price: 199, category: 'E-Kitap', desc: 'FIRE rehberi, 200 sayfa', icon: '📘' },
+  { id: 2, name: 'Excel Bütçe Şablonu', price: 149, category: 'Şablon', desc: 'Hazır bütçe takip dosyası', icon: '📊' },
+  { id: 3, name: 'Borç Kurtulma Planı', price: 249, category: 'Rehber', desc: 'Adım adım borç yönetimi', icon: '🏦' },
+  { id: 4, name: 'Yatırım 101 Video Kursu', price: 499, category: 'Kurs', desc: '6 saatlik video eğitim', icon: '🎥' },
+  { id: 5, name: 'Hisse Analiz Şablonu', price: 299, category: 'Şablon', desc: 'Temel analiz Excel dosyası', icon: '📈' },
+  { id: 6, name: 'Kripto Portföy Takipçisi', price: 179, category: 'Araç', desc: 'Otomatik fiyat güncelleme', icon: '₿' },
+  { id: 7, name: 'Acil Fon Planlayıcı', price: 99, category: 'Şablon', desc: '3/6/12 ay hesaplayıcı', icon: '🛡️' },
+  { id: 8, name: 'Emeklilik Planı Rehberi', price: 219, category: 'E-Kitap', desc: 'Bireysel emeklilik rehberi', icon: '🌴' },
+  { id: 9, name: 'Gayrimenkul Yatırım Rehberi', price: 349, category: 'Rehber', desc: 'Konut alım-satım taktikleri', icon: '🏠' },
+  { id: 10, name: 'Pasif Gelir Fikirleri', price: 159, category: 'E-Kitap', desc: '25 pasif gelir modeli', icon: '💡' },
+  { id: 11, name: 'Vergi Optimizasyon Rehberi', price: 279, category: 'Rehber', desc: 'Yasal vergi tasarrufu', icon: '📑' },
+  { id: 12, name: 'Finansal Özgürlük Danışmanlık Mini', price: 899, category: 'Danışmanlık', desc: '60 dk online görüşme', icon: '💼' },
+];
+
+const DEFAULT_USER_PACKAGES = [
+  { id: 'free', name: 'FREE', price: 0, period: 'aylık', features: ['Gelir-gider takibi','Temel dashboard','Bütçe','Excel export'], color: 'slate' },
+  { id: 'standard', name: 'STANDARD', price: 99, period: 'aylık', features: ['FREE + Borç-alacak','Ödeme takvimi','Finansal hedefler','Acil fon'], color: 'blue' },
+  { id: 'pro', name: 'PRO', price: 249, period: 'aylık', features: ['STANDARD + Yatırım','FIRE analizi','Gelişmiş raporlar','PDF export','Excel import'], color: 'amber' },
+  { id: 'vip', name: 'VIP', price: 599, period: 'aylık', features: ['PRO + Gemini AI asistan','Kişisel finans raporu','Öncelikli destek','Sınırsız danışmanlık'], color: 'purple' },
+];
+
+const DEFAULT_CONSULTING = [
+  { id: 'c1', name: 'Başlangıç Danışmanlığı', price: 1499, duration: '60 dakika', features: ['Finansal durum analizi','Bütçe planı','1 hafta takip'], icon: '🌱' },
+  { id: 'c2', name: 'Profesyonel Danışmanlık', price: 3999, duration: '3 ay program', features: ['Kişisel finans planı','Yatırım stratejisi','Aylık görüşme','Excel şablonları','WhatsApp desteği'], icon: '💼', popular: true },
+  { id: 'c3', name: 'VIP Danışmanlık', price: 9999, duration: '6 ay program', features: ['Her şey dahil','Haftalık görüşme','Portföy takibi','Aile bütçesi','Vergi optimizasyonu','Sınırsız WhatsApp'], icon: '👑' },
+];
+
+const defaultData = {
+  user: { name: 'Demo Kullanıcı', email: 'demo@odak.com', phone: '', currency: 'TRY', incomeGoal: 100000, expenseBudget: 60000, plan: 'free' },
+  incomes: [
+    { id: 1, date: isoDate(0,1), category: 'Maaş', description: 'Aylık maaş', account: 'Ziraat', amount: 85000 },
+    { id: 2, date: isoDate(0,15), category: 'Freelance', description: 'Web projesi', account: 'İş Bankası', amount: 15000 },
+  ],
+  expenses: [
+    { id: 1, date: isoDate(0,5), category: 'Konut', description: 'Kira', type: 'Sabit', amount: 20000 },
+    { id: 2, date: isoDate(0,10), category: 'Market', description: 'Aylık market', type: 'Değişken', amount: 8500 },
+    { id: 3, date: isoDate(0,12), category: 'Faturalar', description: 'Elektrik+Su+İnternet', type: 'Sabit', amount: 3500 },
+    { id: 4, date: isoDate(0,20), category: 'Ulaşım', description: 'Yakıt', type: 'Değişken', amount: 4000 },
+    { id: 5, date: isoDate(0,25), category: 'Restoran', description: 'Yemek', type: 'İsteğe bağlı', amount: 3000 },
+  ],
+  debts: [
+    { id: 1, name: 'Konut Kredisi', creditor: 'Ziraat Bankası', type: 'Banka kredisi', total: 1500000, paid: 300000, monthly: 15000, due: '2030-12-31' },
+    { id: 2, name: 'Kredi Kartı', creditor: 'İş Bankası', type: 'Kredi kartı', total: 500000, paid: 100000, monthly: 5000, due: '2027-06-30' },
+  ],
+  receivables: [
+    { id: 1, debtor: 'Ahmet Y.', description: 'Borç verilen', total: 250000, collected: 100000, status: 'Kısmi tahsilat', due: '2026-12-31' },
+  ],
+  assets: [
+    { id: 1, name: 'Ev', category: 'Gayrimenkul', qty: 1, unitValue: 5000000 },
+    { id: 2, name: 'Altın', category: 'Altın', qty: 100, unitValue: 20000 },
+  ],
+  investments: [
+    { id: 1, name: 'Hisse Senedi', category: 'Hisse', amount: 1500000, cost: 1200000 },
+    { id: 2, name: 'Kripto', category: 'Kripto', amount: 1000000, cost: 900000 },
+  ],
+  goals: [
+    { id: 1, name: 'Ev Alma', target: 5000000, current: 1500000, due: '2028-12-31', monthly: 30000 },
+    { id: 2, name: 'Tatil', target: 100000, current: 45000, due: '2027-06-30', monthly: 5000 },
+  ],
+  budgets: [
+    { id: 1, category: 'Konut', budget: 20000 },
+    { id: 2, category: 'Market', budget: 10000 },
+    { id: 3, category: 'Ulaşım', budget: 5000 },
+    { id: 4, category: 'Faturalar', budget: 4000 },
+  ],
+  emergencyFund: { monthly: 50000, current: 150000 },
+  fire: { monthly: 60000, rate: 4, type: 'regular', annualContribution: 240000, expectedReturn: 7 },
+  marketProducts: JSON.parse(JSON.stringify(DEFAULT_MARKET_PRODUCTS)),
+  userPackages: JSON.parse(JSON.stringify(DEFAULT_USER_PACKAGES)),
+  consultingPackages: JSON.parse(JSON.stringify(DEFAULT_CONSULTING)),
+  orders: [],
+  siteMode: 'open',
+  geminiKey: '',
+  lang: 'tr',
+  adminUsers: [{ id: 1, name: 'Demo Kullanıcı', email: 'demo@odak.com', plan: 'free', createdAt: new Date().toISOString() }],
+  siteUsers: [],
+};
+
+let data = loadData();
+let charts = {};
+let adminLoggedIn = false;
+
+function loadData() {
+  try { const s = localStorage.getItem(STORAGE_KEY); if (s) return JSON.parse(s); } catch(e) {}
+  return JSON.parse(JSON.stringify(defaultData));
+}
+function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+function uid() { return Date.now() + Math.floor(Math.random()*10000); }
+function fmt(n) { return '₺' + Number(n||0).toLocaleString('tr-TR', {maximumFractionDigits:0}); }
+function esc(s) { return String(s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ==================== LANGUAGE ====================
+function setLang(lang) {
+  data.lang = lang; saveData();
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.dataset.i18n;
+    if (I18N[lang] && I18N[lang][k]) el.textContent = I18N[lang][k];
+  });
+  const sel = document.getElementById('langSelect');
+  if (sel) sel.value = lang;
+  const t = { thisMonth:'Bu Ay', lastMonth:'Geçen Ay', last3:'Son 3 Ay', last6:'Son 6 Ay', thisYear:'Bu Yıl', lastYear:'Geçen Yıl', all:'Tümü' };
+  if (lang === 'en') {
+    const tEn = { thisMonth:'This Month', lastMonth:'Last Month', last3:'Last 3 Months', last6:'Last 6 Months', thisYear:'This Year', lastYear:'Last Year', all:'All' };
+    Object.keys(tEn).forEach(k => {
+      const opt = document.querySelector(`#dateFilter option[value="${k}"]`);
+      if (opt) opt.textContent = tEn[k];
+      const opt2 = document.querySelector(`#dateFilterMobile option[value="${k}"]`);
+      if (opt2) opt2.textContent = tEn[k];
+    });
+  }
+}
+
+// ==================== AUTH ====================
+function login() {
+  if (data.siteMode === 'closed') { toast('Site şu anda kapalı. Lütfen daha sonra tekrar deneyin.', 'error'); return; }
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPassword').value;
+  if (!email || !pw) return toast('E-posta ve şifre gerekli', 'error');
+  if (pw.length < 4) return toast('Şifre çok kısa', 'error');
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('userGreeting').textContent = 'Hoş geldiniz, ' + (data.user.name || 'Kullanıcı');
+  const planBadge = document.getElementById('userPlanBadge');
+  if (planBadge) { planBadge.textContent = (data.user.plan || 'free').toUpperCase(); }
+  document.getElementById('footerYear').textContent = new Date().getFullYear();
+  setLang(data.lang || 'tr');
+  renderAll();
+  toast('Giriş başarılı', 'success');
+}
+function showRegister() { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); }
+function showLogin() { document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); }
+function register() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pw = document.getElementById('regPassword').value;
+  if (!name || !email || pw.length < 6) return toast('Tüm alanları doldurun (şifre min 6 karakter)', 'error');
+  if (data.siteUsers.find(u => u.email === email)) return toast('Bu e-posta zaten kayıtlı', 'error');
+  data.siteUsers.push({ id: uid(), name, email, password: pw, plan: 'free', createdAt: new Date().toISOString() });
+  data.adminUsers.push({ id: uid(), name, email, plan: 'free', createdAt: new Date().toISOString() });
+  data.user.name = name; data.user.email = email;
+  saveData();
+  showLogin();
+  document.getElementById('loginEmail').value = email;
+  document.getElementById('loginPassword').value = '';
+  toast('Hesap oluşturuldu, giriş yapabilirsiniz', 'success');
+}
+function logout() {
+  if (!confirm('Çıkış yapmak istediğinize emin misiniz?')) return;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  const hidden = sb.classList.contains('-translate-x-full');
+  if (hidden) { sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden'); }
+  else { sb.classList.add('-translate-x-full'); ov.classList.add('hidden'); }
+}
+
+// ==================== ADMIN ====================
+function openAdminLogin() { document.getElementById('adminLoginModal').classList.add('open'); }
+function adminLogin() {
+  const u = document.getElementById('adminUser').value;
+  const p = document.getElementById('adminPass').value;
+  if (u === ADMIN_CREDS.user && p === ADMIN_CREDS.pass) {
+    adminLoggedIn = true;
+    document.getElementById('adminLoginModal').classList.remove('open');
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('adminPanel').classList.remove('hidden');
+    renderAdminPanel();
+    toast('Admin girişi başarılı', 'success');
+  } else {
+    toast('Kullanıcı adı veya şifre hatalı', 'error');
+  }
+}
+function adminLogout() {
+  adminLoggedIn = false;
+  document.getElementById('adminPanel').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+function toggleSiteMode() {
+  data.siteMode = data.siteMode === 'open' ? 'closed' : 'open';
+  saveData();
+  updateSiteModeBtn();
+  toast('Site modu: ' + (data.siteMode === 'open' ? 'AÇIK' : 'KAPALI'), data.siteMode === 'open' ? 'success' : 'warn');
+}
+function updateSiteModeBtn() {
+  const btn = document.getElementById('siteModeBtn');
+  if (!btn) return;
+  if (data.siteMode === 'open') { btn.textContent = '🟢 Site: Açık'; btn.className = 'btn bg-green-600 hover:bg-green-700 text-white'; }
+  else { btn.textContent = '🔴 Site: Kapalı'; btn.className = 'btn bg-red-600 hover:bg-red-700 text-white'; }
+}
+function renderAdminPanel() {
+  updateSiteModeBtn();
+  document.getElementById('admUsers').textContent = data.adminUsers.length;
+  document.getElementById('admSubs').textContent = data.adminUsers.filter(u => u.plan !== 'free').length;
+  document.getElementById('admProducts').textContent = data.marketProducts.length;
+  document.getElementById('admOrders').textContent = data.orders.length;
+
+  // Products
+  const pl = document.getElementById('admProductList');
+  pl.innerHTML = data.marketProducts.length ? data.marketProducts.map(p => `
+    <div class="flex items-center justify-between p-2 border border-slate-200 rounded">
+      <div class="flex items-center gap-2"><span class="text-xl">${p.icon||'📦'}</span><div><div class="text-sm font-semibold">${esc(p.name)}</div><div class="text-xs text-slate-500">${fmt(p.price)} · ${esc(p.category||'')}</div></div></div>
+      <button onclick="adminDeleteProduct(${p.id})" class="text-red-500 hover:text-red-700 text-xs font-semibold">Sil</button>
+    </div>`).join('') : '<p class="text-slate-400 text-sm">Ürün yok</p>';
+
+  // Users
+  const ul = document.getElementById('admUserList');
+  ul.innerHTML = data.adminUsers.length ? data.adminUsers.map(u => `
+    <div class="flex items-center justify-between p-2 border border-slate-200 rounded">
+      <div><div class="text-sm font-semibold">${esc(u.name)}</div><div class="text-xs text-slate-500">${esc(u.email)}</div></div>
+      <span class="badge badge-${u.plan==='vip'?'purple':u.plan==='pro'?'amber':u.plan==='standard'?'blue':'slate'}">${(u.plan||'free').toUpperCase()}</span>
+    </div>`).join('') : '<p class="text-slate-400 text-sm">Kullanıcı yok</p>';
+
+  // Orders
+  const ol = document.getElementById('admOrderList');
+  ol.innerHTML = data.orders.length ? data.orders.slice().reverse().map(o => `
+    <div class="p-3 border border-slate-200 rounded bg-slate-50">
+      <div class="flex justify-between items-start mb-1">
+        <div><div class="font-semibold text-sm">${esc(o.itemName)}</div><div class="text-xs text-slate-500">${esc(o.type)} · ${fmt(o.price)}</div></div>
+        <span class="text-xs text-slate-400">${new Date(o.createdAt).toLocaleString('tr-TR')}</span>
+      </div>
+      <div class="text-xs text-slate-600">👤 ${esc(o.customerName||'-')} · 📞 ${esc(o.customerPhone||'-')}</div>
+      ${o.note ? `<div class="text-xs text-slate-500 mt-1">📝 ${esc(o.note)}</div>` : ''}
+      <div class="mt-2 flex gap-2">
+        <a href="https://wa.me/${(o.customerPhone||'').replace(/\D/g,'')}?text=${encodeURIComponent('Merhaba '+(o.customerName||'')+', '+o.itemName+' siparişiniz hakkında bilgi vermek istiyoruz.')}" target="_blank" class="btn btn-whatsapp text-xs">💬 WhatsApp</a>
+        <button onclick="adminDeleteOrder(${o.id})" class="btn btn-outline text-xs">Sil</button>
+      </div>
+    </div>`).join('') : '<p class="text-slate-400 text-sm">Sipariş yok</p>';
+}
+function adminAddProduct() {
+  const name = document.getElementById('admProdName').value.trim();
+  const price = Number(document.getElementById('admProdPrice').value) || 0;
+  if (!name || !price) return toast('Ürün adı ve fiyat gerekli', 'error');
+  data.marketProducts.push({ id: uid(), name, price, category: 'Diğer', desc: '', icon: '📦' });
+  saveData();
+  document.getElementById('admProdName').value = '';
+  document.getElementById('admProdPrice').value = '';
+  renderAdminPanel();
+  renderAll();
+  toast('Ürün eklendi', 'success');
+}
+function adminDeleteProduct(id) {
+  if (!confirm('Ürünü silmek istediğinize emin misiniz?')) return;
+  data.marketProducts = data.marketProducts.filter(p => p.id !== id);
+  saveData();
+  renderAdminPanel();
+  renderAll();
+  toast('Ürün silindi', 'success');
+}
+function adminDeleteOrder(id) {
+  if (!confirm('Siparişi silmek istediğinize emin misiniz?')) return;
+  data.orders = data.orders.filter(o => o.id !== id);
+  saveData();
+  renderAdminPanel();
+  toast('Sipariş silindi', 'success');
+}
+
+// ==================== NAVIGATION ====================
+const pageTitles = {
+  dashboard:'Dashboard', income:'Gelirler', expense:'Giderler', cashflow:'Nakit Akışı',
+  budget:'Bütçe', debts:'Borçlar', receivables:'Alacaklar', calendar:'Ödeme Takvimi',
+  assets:'Varlıklar', investments:'Yatırımlar', networth:'Net Servet', goals:'Finansal Hedefler',
+  emergency:'Acil Fon', plan12:'12 Aylık Plan', fire:'FIRE', market:'Market', packages:'Kullanıcı Paketleri',
+  consulting:'Danışmanlık', reports:'Raporlar', ai:'AI Asistan', settings:'Ayarlar'
+};
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + name);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(a => a.classList.toggle('active', a.dataset.page === name));
+  document.getElementById('pageTitle').textContent = pageTitles[name] || name;
+  if (window.innerWidth < 768) {
+    document.getElementById('sidebar').classList.add('-translate-x-full');
+    document.getElementById('sidebarOverlay').classList.add('hidden');
+  }
+  if (name === 'settings') loadSettings();
+  if (name === 'ai') loadGeminiKey();
+  renderAll();
+}
+
+// ==================== FILTERS ====================
+function syncFilter(v) {
+  document.getElementById('dateFilter').value = v;
+  document.getElementById('dateFilterMobile').value = v;
+  renderAll();
+}
+function getDateRange() {
+  const f = document.getElementById('dateFilter').value;
+  const now = new Date(); const y = now.getFullYear(), m = now.getMonth();
+  if (f === 'thisMonth') return [new Date(y,m,1), new Date(y,m+1,0,23,59)];
+  if (f === 'lastMonth') return [new Date(y,m-1,1), new Date(y,m,0,23,59)];
+  if (f === 'last3') return [new Date(y,m-2,1), new Date(y,m+1,0,23,59)];
+  if (f === 'last6') return [new Date(y,m-5,1), new Date(y,m+1,0,23,59)];
+  if (f === 'thisYear') return [new Date(y,0,1), new Date(y,11,31,23,59)];
+  if (f === 'lastYear') return [new Date(y-1,0,1), new Date(y-1,11,31,23,59)];
+  return [new Date(2000,0,1), new Date(2100,0,1)];
+}
+function inRange(dateStr) { if (!dateStr) return false; const [s,e] = getDateRange(); const d = new Date(dateStr); return d >= s && d <= e; }
+function filtered(list) { return list.filter(x => inRange(x.date)); }
+
+// ==================== CALC ====================
+function calc() {
+  const incomes = filtered(data.incomes), expenses = filtered(data.expenses);
+  const totalIncome = incomes.reduce((s,x)=>s+Number(x.amount||0),0);
+  const totalExpense = expenses.reduce((s,x)=>s+Number(x.amount||0),0);
+  const totalDebt = data.debts.reduce((s,x)=>s+Math.max(0,Number(x.total||0)-Number(x.paid||0)),0);
+  const totalDebtPayment = data.debts.reduce((s,x)=>s+Number(x.monthly||0),0);
+  const totalReceivable = data.receivables.reduce((s,x)=>s+Math.max(0,Number(x.total||0)-Number(x.collected||0)),0);
+  const totalAssets = data.assets.reduce((s,x)=>s+Number(x.qty||0)*Number(x.unitValue||0),0);
+  const totalInvestments = data.investments.reduce((s,x)=>s+Number(x.amount||0),0);
+  const netCash = totalIncome - totalExpense - totalDebtPayment;
+  const netWorth = totalAssets + totalReceivable - totalDebt;
+  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome * 100) : 0;
+  return { totalIncome, totalExpense, totalDebt, totalDebtPayment, totalReceivable, totalAssets, totalInvestments, netCash, netWorth, savingsRate };
+}
+
+// ==================== FIRE TYPES ====================
+const FIRE_TYPES = {
+  lean: { name: 'Lean FIRE', desc: 'Minimum yaşam, %50-70 gider', mult: 0.7, rate: 4 },
+  regular: { name: 'Regular FIRE', desc: 'Mevcut yaşam standardı', mult: 1, rate: 4 },
+  fat: { name: 'Fat FIRE', desc: 'Konforlu yaşam, %150-200 gider', mult: 1.7, rate: 3.5 },
+  barista: { name: 'Barista FIRE', desc: 'Yarı zamanlı çalışma', mult: 0.6, rate: 4.5 },
+  coast: { name: 'Coast FIRE', desc: 'Sadece katkı, çekim yok', mult: 1, rate: 4 },
+  cashflow: { name: 'Cashflow FIRE', desc: 'Pasif gelir ile yaşam', mult: 1, rate: 5 },
+};
+function renderFireTypes() {
+  const grid = document.getElementById('fireTypeGrid');
+  if (!grid) return;
+  grid.innerHTML = Object.entries(FIRE_TYPES).map(([k,v]) => {
+    const active = data.fire.type === k;
+    return `<button onclick="setFireType('${k}')" class="p-3 rounded-lg border-2 text-left transition ${active?'border-amber-500 bg-amber-50':'border-slate-200 hover:border-slate-300'}">
+      <div class="font-bold text-sm text-slate-800">${v.name}</div>
+      <div class="text-xs text-slate-500 mt-1">${v.desc}</div>
+      <div class="text-xs text-amber-600 font-semibold mt-1">×${v.mult} · %${v.rate} kural</div>
+    </button>`;
+  }).join('');
+}
+function setFireType(t) {
+  data.fire.type = t;
+  data.fire.rate = FIRE_TYPES[t].rate;
+  saveData();
+  document.getElementById('fireRate').value = data.fire.rate;
+  renderFire();
+  renderFireTypes();
+}
+
+// ==================== RENDER ====================
+function renderAll() {
+  renderDashboard(); renderIncome(); renderExpense(); renderCashflow(); renderBudget();
+  renderDebts(); renderReceivables(); renderCalendar(); renderAssets(); renderInvestments();
+  renderNetWorth(); renderGoals(); renderEmergency(); renderPlan12(); renderFire();
+  renderInvestmentsTable(); renderMarket(); renderUserPackages(); renderConsulting();
+}
+
+function renderDashboard() {
+  const c = calc();
+  const set = (id,v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  set('dashAssets', fmt(c.totalAssets)); set('dashDebts', fmt(c.totalDebt));
+  set('dashReceivables', fmt(c.totalReceivable)); set('dashNetWorth', fmt(c.netWorth));
+  set('dashIncome', fmt(c.totalIncome)); set('dashExpense', fmt(c.totalExpense));
+  set('dashCashflow', fmt(c.netCash)); set('dashSavingsRate', '%' + c.savingsRate.toFixed(1));
+  set('dashDebtPayment', fmt(c.totalDebtPayment)); set('dashInvestments', fmt(c.totalInvestments));
+
+  const em = data.emergencyFund, emTarget = em.monthly * 6;
+  const emPct = emTarget > 0 ? Math.min(100, em.current/emTarget*100) : 0;
+  set('dashEmergency', fmt(em.current) + ' / ' + fmt(emTarget));
+  const emBar = document.getElementById('dashEmergencyBar'); if (emBar) emBar.style.width = emPct + '%';
+
+  const fireTarget = computeFireTarget();
+  const firePct = fireTarget > 0 ? Math.min(100, c.totalInvestments/fireTarget*100) : 0;
+  set('dashFire', '%' + firePct.toFixed(1));
+  const fireBar = document.getElementById('dashFireBar'); if (fireBar) fireBar.style.width = firePct + '%';
+
+  const labels = { thisMonth:'Bu Ay', lastMonth:'Geçen Ay', last3:'Son 3 Ay', last6:'Son 6 Ay', thisYear:'Bu Yıl', lastYear:'Geçen Yıl', all:'Tüm Zamanlar' };
+  set('dashPeriod', labels[document.getElementById('dateFilter').value] || '');
+
+  renderCharts(c); renderAlerts(c); renderHealthScore(c);
+}
+
+function renderIncome() {
+  const tbody = document.getElementById('incomeTable'); if (!tbody) return;
+  const list = filtered(data.incomes).sort((a,b)=>b.date.localeCompare(a.date));
+  tbody.innerHTML = list.length ? list.map(x => `<tr><td>${x.date}</td><td><span class="badge badge-green">${esc(x.category)}</span></td><td>${esc(x.description||'-')}</td><td>${esc(x.account||'-')}</td><td class="text-right font-semibold text-green-600">${fmt(x.amount)}</td><td><button onclick="deleteItem('incomes',${x.id})" class="text-red-500 hover:text-red-700 text-sm font-semibold">Sil</button></td></tr>`).join('') : '<tr><td colspan="6" class="text-center text-slate-400 py-8">Kayıt yok</td></tr>';
+}
+function renderExpense() {
+  const tbody = document.getElementById('expenseTable'); if (!tbody) return;
+  const list = filtered(data.expenses).sort((a,b)=>b.date.localeCompare(a.date));
+  tbody.innerHTML = list.length ? list.map(x => `<tr><td>${x.date}</td><td><span class="badge badge-red">${esc(x.category)}</span></td><td>${esc(x.description||'-')}</td><td><span class="badge badge-blue">${esc(x.type||'-')}</span></td><td class="text-right font-semibold text-red-500">${fmt(x.amount)}</td><td><button onclick="deleteItem('expenses',${x.id})" class="text-red-500 hover:text-red-700 text-sm font-semibold">Sil</button></td></tr>`).join('') : '<tr><td colspan="6" class="text-center text-slate-400 py-8">Kayıt yok</td></tr>';
+}
+function renderCashflow() {
+  const c = calc(); const set = (id,v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  set('cfIncome', fmt(c.totalIncome)); set('cfExpense', fmt(c.totalExpense)); set('cfNet', fmt(c.netCash));
+}
+function renderBudget() {
+  const grid = document.getElementById('budgetGrid'); if (!grid) return;
+  const expenses = filtered(data.expenses);
+  if (!data.budgets.length) { grid.innerHTML = '<p class="text-slate-400">Bütçe yok.</p>'; return; }
+  grid.innerHTML = data.budgets.map(b => {
+    const spent = expenses.filter(e => e.category === b.category).reduce((s,x)=>s+Number(x.amount||0),0);
+    const pct = b.budget > 0 ? (spent/b.budget*100) : 0;
+    const cls = pct >= 100 ? 'danger' : pct >= 80 ? 'warn' : '';
+    const warn = pct >= 100 ? '<p class="text-xs text-red-500 mt-2 font-semibold">⚠️ Bütçenizin %100\'ünü aştınız.</p>' : '';
+    return `<div class="card p-5"><div class="flex justify-between items-start mb-3"><h4 class="font-bold text-slate-800">${esc(b.category)}</h4><button onclick="deleteItem('budgets',${b.id})" class="text-red-400 hover:text-red-600 text-xs">✕</button></div>
+      <div class="flex justify-between text-sm mb-2"><span class="text-slate-500">Bütçe:</span><span class="font-semibold">${fmt(b.budget)}</span></div>
+      <div class="flex justify-between text-sm mb-2"><span class="text-slate-500">Gerçekleşen:</span><span class="font-semibold">${fmt(spent)}</span></div>
+      <div class="flex justify-between text-sm mb-3"><span class="text-slate-500">Kalan:</span><span class="font-semibold ${b.budget-spent<0?'text-red-500':'text-green-600'}">${fmt(b.budget-spent)}</span></div>
+      <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">Kullanım</span><span class="font-semibold ${pct>=100?'text-red-500':pct>=80?'text-amber-500':'text-green-600'}">%${pct.toFixed(0)}</span></div>
+      <div class="progress-bar"><div class="progress-fill ${cls}" style="width:${Math.min(100,pct)}%"></div></div>${warn}</div>`;
+  }).join('');
+}
+function renderDebts() {
+  const total = data.debts.reduce((s,x)=>s+Number(x.total||0),0);
+  const paid = data.debts.reduce((s,x)=>s+Number(x.paid||0),0);
+  const set = (id,v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  set('debtTotal', fmt(total)); set('debtPaid', fmt(paid)); set('debtRemaining', fmt(total-paid));
+  const tbody = document.getElementById('debtTable'); if (!tbody) return;
+  tbody.innerHTML = data.debts.length ? data.debts.map(x => `<tr><td class="font-semibold">${esc(x.name)}</td><td>${esc(x.creditor)}</td><td><span class="badge badge-amber">${esc(x.type)}</span></td><td class="text-right">${fmt(x.total)}</td><td class="text-right font-semibold text-red-500">${fmt(x.total-x.paid)}</td><td class="text-right">${fmt(x.monthly)}</td><td>${x.due||'-'}</td><td><button onclick="deleteItem('debts',${x.id})" class="text-red-500 hover:text-red-700 text-sm font-semibold">Sil</button></td></tr>`).join('') : '<tr><td colspan="8" class="text-center text-slate-400 py-8">Kayıt yok</td></tr>';
+}
+function renderReceivables() {
+  const tbody = document.getElementById('receivableTable'); if (!tbody) return;
+  tbody.innerHTML = data.receivables.length ? data.receivables.map(x => `<tr><td class="font-semibold">${esc(x.debtor)}</td><td>${esc(x.description||'-')}</td><td class="text-right">${fmt(x.total)}</td><td class="text-right text-green-600">${fmt(x.collected)}</td><td class="text-right font-semibold">${fmt(x.total-x.collected)}</td><td><span class="badge badge-blue">${esc(x.status)}</span></td><td><button onclick="deleteItem('receivables',${x.id})" class="text-red-500 hover:text-red-700 text-sm font-semibold">Sil</button></td></tr>`).join('') : '<tr><td colspan="7" class="text-center text-slate-400 py-8">Kayıt yok</td></tr>';
+}
+function renderCalendar() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const b = { calToday:[], cal7:[], cal30:[], cal60:[] };
+  data.debts.forEach(d => {
+    if (!d.due) return;
+    const due = new Date(d.due); due.setHours(0,0,0,0);
+    const days = Math.ceil((due - today) / 86400000);
+    const item = `<div class="text-xs"><div class="font-semibold text-slate-800">${esc(d.name)}</div><div class="text-slate-500">${d.due} · ${fmt(d.monthly)}</div></div>`;
+    if (days <= 0) b.calToday.push(item); else if (days <= 7) b.cal7.push(item); else if (days <= 30) b.cal30.push(item); else if (days <= 60) b.cal60.push(item);
+  });
+  Object.keys(b).forEach(k => { const el = document.getElementById(k); if (el) el.innerHTML = b[k].length ? b[k].join('<hr class="my-2 border-slate-100">') : '<p class="text-xs text-slate-400">Ödeme yok</p>'; });
+}
+function renderAssets() {
+  const total = data.assets.reduce((s,x)=>s+Number(x.qty||0)*Number(x.unitValue||0),0);
+  const el = document.getElementById('assetTotal'); if (el) el.textContent = fmt(total);
+  const tbody = document.getElementById('assetTable'); if (!tbody) return;
+  tbody.innerHTML = data.assets.length ? data.assets.map(x => `<tr><td class="font-semibold">${esc(x.name)}</td><td><span class="badge badge-amber">${esc(x.category)}</span></td><td class="text-right">${x.qty}</td><td class="text-right">${fmt(x.unitValue)}</td><td class="text-right font-semibold">${fmt(x.qty*x.unitValue)}</td><td><button onclick="deleteItem('assets',${x.id})" class="text-red-500 hover:text-red-700 text-sm font-semibold">Sil</button></td></tr>`).join('') : '<tr><td colspan="6" class="text-center text-slate-400 py-8">Kayıt yok</td></tr>';
+}
+function renderInvestments() {
+  const total = data.investments.reduce((s,x)=>s+Number(x.amount||0),0);
+  const cost = data.investments.reduce((s,x)=>s+Number(x.cost||0),0);
+  const pl = total - cost; const ret = cost > 0 ? (pl/cost*100) : 0;
+  const set = (id,v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  set('invTotal', fmt(total));
+  const plEl = document.getElementById('invPL'); if (plEl) { plEl.textContent = fmt(pl); plEl.className = 'text-2xl font-bold mt-2 ' + (pl>=0?'text-green-600':'text-red-500'); }
+  const retEl = document.getElementById('invReturn'); if (retEl) { retEl.textContent = '%' + ret.toFixed(1); retEl.className = 'text-2xl font-bold mt-2 ' + (ret>=0?'text-green-600':'text-red-500'); }
+}
+function renderInvestmentsTable() {
+  const tbody = document.getElementById('investmentTable'); if (!tbody) return;
+  tbody.innerHTML = data.investments.length ? data.investments.map(x => {
+    const pl = Number(x.amount||0) - Number(x.cost||0);
+    return `<tr><td class="font-semibold">${esc(x.name)}</td><td><span class="badge badge-amber">${esc(x.category)}</span></td><td class="text-right">${fmt(x.cost)}</td><td class="text-right">${fmt(x.amount)}</td><td class="text-right font-semibold ${pl>=0?'text-green-600':'text-red-500'}">${fmt(pl)}</td><td><button onclick="deleteItem('investments',${x.id})" class="text-red-500 hover:text-red-700 text-sm font-semibold">Sil</button></td></tr>`;
+  }).join('') : '<tr><td colspan="6" class="text-center text-slate-400 py-8">Kayıt yok</td></tr>';
+}
+function renderNetWorth() { const el = document.getElementById('nwTotal'); if (el) el.textContent = fmt(calc().netWorth); }
+function renderGoals() {
+  const grid = document.getElementById('goalsGrid'); if (!grid) return;
+  if (!data.goals.length) { grid.innerHTML = '<p class="text-slate-400">Hedef yok.</p>'; return; }
+  grid.innerHTML = data.goals.map(g => {
+    const pct = g.target > 0 ? Math.min(100, g.current/g.target*100) : 0;
+    const cls = pct >= 100 ? '' : pct >= 50 ? 'warn' : '';
+    const remaining = Math.max(0, g.target - g.current);
+    const monthsLeft = g.monthly > 0 ? Math.ceil(remaining / g.monthly) : 0;
+    return `<div class="card p-5"><div class="flex justify-between items-start mb-3"><h4 class="font-bold text-slate-800">${esc(g.name)}</h4><button onclick="deleteItem('goals',${g.id})" class="text-red-400 hover:text-red-600 text-xs">✕</button></div>
+      <div class="flex justify-between text-sm mb-2"><span class="text-slate-500">Hedef:</span><span class="font-semibold">${fmt(g.target)}</span></div>
+      <div class="flex justify-between text-sm mb-2"><span class="text-slate-500">Mevcut:</span><span class="font-semibold">${fmt(g.current)}</span></div>
+      <div class="flex justify-between text-sm mb-2"><span class="text-slate-500">Kalan:</span><span class="font-semibold text-amber-600">${fmt(remaining)}</span></div>
+      <div class="flex justify-between text-sm mb-3"><span class="text-slate-500">Aylık katkı:</span><span class="font-semibold">${fmt(g.monthly)}</span></div>
+      <div class="progress-bar"><div class="progress-fill ${cls}" style="width:${pct}%"></div></div>
+      <div class="flex justify-between text-xs text-slate-400 mt-2"><span>%${pct.toFixed(1)}</span><span>${monthsLeft > 0 ? monthsLeft + ' ay kaldı' : 'Hedefe ulaşıldı!'}</span></div>
+      <p class="text-xs text-slate-400 mt-1">Hedef tarihi: ${g.due||'-'}</p></div>`;
+  }).join('');
+}
+function renderEmergency() {
+  const mEl = document.getElementById('emMonthly'), cEl = document.getElementById('emCurrent');
+  if (mEl && !mEl.value) mEl.value = data.emergencyFund.monthly;
+  if (cEl && !cEl.value) cEl.value = data.emergencyFund.current;
+  const m = Number(mEl?.value||0), c = Number(cEl?.value||0);
+  data.emergencyFund.monthly = m; data.emergencyFund.current = c;
+  const grid = document.getElementById('emGrid'); if (!grid) return;
+  grid.innerHTML = [3,6,12].map(t => {
+    const target = m * t; const pct = target > 0 ? Math.min(100, c/target*100) : 0;
+    const cls = pct >= 100 ? '' : pct >= 50 ? 'warn' : 'danger';
+    return `<div class="card p-5"><h4 class="font-bold text-slate-800 mb-3">${t} Aylık Acil Fon</h4><p class="text-2xl font-bold text-slate-800 mb-2">${fmt(target)}</p><p class="text-sm text-slate-500 mb-3">${fmt(c)} / ${fmt(target)}</p><div class="progress-bar"><div class="progress-fill ${cls}" style="width:${pct}%"></div></div><p class="text-xs text-slate-500 mt-2 font-semibold">%${pct.toFixed(1)} tamamlandı</p></div>`;
+  }).join('');
+}
+function renderPlan12() {
+  const tbody = document.getElementById('plan12Table'); if (!tbody) return;
+  const months = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  const baseIncome = data.user.incomeGoal || 100000, baseExpense = data.user.expenseBudget || 60000;
+  const monthlyDebt = data.debts.reduce((s,x)=>s+Number(x.monthly||0),0);
+  tbody.innerHTML = months.map((m,i) => {
+    const income = baseIncome + i*2000, expense = baseExpense + i*500, inv = 20000, save = income - expense - monthlyDebt;
+    return `<tr><td class="font-semibold">${m}</td><td class="text-right">${fmt(income)}</td><td class="text-right">${fmt(expense)}</td><td class="text-right">${fmt(monthlyDebt)}</td><td class="text-right">${fmt(inv)}</td><td class="text-right font-semibold ${save>=0?'text-green-600':'text-red-500'}">${fmt(save)}</td></tr>`;
+  }).join('');
+}
+function computeFireTarget() {
+  const ft = FIRE_TYPES[data.fire.type] || FIRE_TYPES.regular;
+  const monthly = Number(data.fire.monthly||0) * ft.mult;
+  const rate = Number(data.fire.rate||4) / 100;
+  return rate > 0 ? (monthly * 12) / rate : 0;
+}
+function renderFire() {
+  const mEl = document.getElementById('fireMonthly'), rEl = document.getElementById('fireRate');
+  if (mEl && !mEl.value) mEl.value = data.fire.monthly;
+  if (rEl && !rEl.value) rEl.value = data.fire.rate;
+  const m = Number(mEl?.value||0), r = Number(rEl?.value||4);
+  data.fire.monthly = m; data.fire.rate = r;
+  const target = computeFireTarget();
+  const current = calc().totalInvestments;
+  const pct = target > 0 ? Math.min(100, current/target*100) : 0;
+  const set = (id,v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  set('fireTarget', fmt(target)); set('fireCurrent', fmt(current)); set('fireProgress', '%' + pct.toFixed(1));
+
+  // FIRE year estimation
+  const annualContrib = Number(data.fire.annualContribution||0) + (calc().netCash*12);
+  const expectedReturn = Number(data.fire.expectedReturn||7) / 100;
+  let yearText = 'Hesaplanamadı';
+  if (annualContrib > 0 && target > current) {
+    const remaining = target - current;
+    let years = 0, balance = current;
+    while (balance < target && years < 80) { balance = balance * (1 + expectedReturn) + annualContrib; years++; }
+    if (years < 80) yearText = (new Date().getFullYear() + years) + ' (~' + years + ' yıl)';
+  } else if (current >= target) yearText = '🎉 Hedefe ulaşıldı!';
+  set('fireYear', yearText);
+
+  renderFireTypes();
+  const ctx = document.getElementById('chartFire'); if (!ctx) return;
+  if (charts.fire) charts.fire.destroy();
+  charts.fire = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels: ['Mevcut','Kalan'], datasets: [{ data: [current, Math.max(0,target-current)], backgroundColor: ['#f59e0b','#e2e8f0'], borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '65%' }
+  });
+}
+
+// ==================== MARKET / PACKAGES / CONSULTING ====================
+function renderMarket() {
+  const grid = document.getElementById('marketGrid'); if (!grid) return;
+  if (!data.marketProducts.length) { grid.innerHTML = '<p class="text-slate-400">Ürün yok.</p>'; return; }
+  grid.innerHTML = data.marketProducts.map(p => `
+    <div class="card product-card p-5">
+      <div class="text-4xl mb-2">${p.icon||'📦'}</div>
+      <div class="text-xs uppercase font-bold text-slate-500 mb-1">${esc(p.category||'Ürün')}</div>
+      <h4 class="font-bold text-slate-800 mb-1">${esc(p.name)}</h4>
+      <p class="text-xs text-slate-500 mb-3">${esc(p.desc||'')}</p>
+      <div class="text-2xl font-bold text-amber-600 mb-3">${fmt(p.price)}</div>
+      <div class="flex gap-2">
+        <button onclick="buyItem('product', ${p.id})" class="btn btn-whatsapp flex-1 text-sm">💬 Satın Al</button>
+        <button onclick="deleteItem('marketProducts',${p.id})" class="btn btn-outline text-sm">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+function renderUserPackages() {
+  const grid = document.getElementById('userPackagesGrid'); if (!grid) return;
+  grid.innerHTML = data.userPackages.map(p => {
+    const badge = p.color === 'purple' ? 'badge-purple' : p.color === 'amber' ? 'badge-amber' : p.color === 'blue' ? 'badge-blue' : 'badge-slate';
+    const active = data.user.plan === p.id;
+    return `<div class="card p-6 ${active ? 'border-2 border-amber-500' : ''}">
+      <div class="flex justify-between items-start mb-3">
+        <h4 class="text-xl font-bold text-slate-800">${esc(p.name)}</h4>
+        <span class="badge ${badge}">${active?'AKTİF':'PAKET'}</span>
+      </div>
+      <div class="text-3xl font-bold text-amber-600 mb-1">${p.price === 0 ? 'Ücretsiz' : fmt(p.price)}</div>
+      <div class="text-xs text-slate-500 mb-4">/ ${esc(p.period)}</div>
+      <ul class="space-y-2 text-sm text-slate-600 mb-4">
+        ${p.features.map(f => `<li class="flex items-start gap-2"><span class="text-green-500">✓</span><span>${esc(f)}</span></li>`).join('')}
+      </ul>
+      ${active ? '<button class="btn btn-outline w-full" disabled>Aktif Paketiniz</button>' : `<button onclick="buyItem('package', '${p.id}')" class="btn btn-whatsapp w-full">💬 WhatsApp ile Satın Al</button>`}
+    </div>`;
+  }).join('');
+}
+function renderConsulting() {
+  const grid = document.getElementById('consultingGrid'); if (!grid) return;
+  grid.innerHTML = data.consultingPackages.map(c => `
+    <div class="card p-6 ${c.popular ? 'border-2 border-amber-500 relative' : ''}">
+      ${c.popular ? '<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">EN POPÜLER</div>' : ''}
+      <div class="text-5xl text-center mb-3">${c.icon||'💼'}</div>
+      <h4 class="text-xl font-bold text-slate-800 text-center mb-2">${esc(c.name)}</h4>
+      <div class="text-center text-xs text-slate-500 mb-4">${esc(c.duration)}</div>
+      <div class="text-3xl font-bold text-amber-600 text-center mb-4">${fmt(c.price)}</div>
+      <ul class="space-y-2 text-sm text-slate-600 mb-4">
+        ${c.features.map(f => `<li class="flex items-start gap-2"><span class="text-green-500">✓</span><span>${esc(f)}</span></li>`).join('')}
+      </ul>
+      <button onclick="buyItem('consulting', '${c.id}')" class="btn btn-whatsapp w-full">💬 WhatsApp ile Başvur</button>
+    </div>`).join('');
+}
+
+function buyItem(type, id) {
+  let itemName = '', price = 0;
+  if (type === 'product') { const p = data.marketProducts.find(x => x.id === id); if (!p) return; itemName = p.name; price = p.price; }
+  else if (type === 'package') { const p = data.userPackages.find(x => x.id === id); if (!p) return; itemName = 'Kullanıcı Paketi: ' + p.name; price = p.price; }
+  else if (type === 'consulting') { const p = data.consultingPackages.find(x => x.id === id); if (!p) return; itemName = 'Danışmanlık: ' + p.name; price = p.price; }
+
+  const msg = `Merhaba, ${itemName} (${fmt(price)}) hakkında bilgi almak ve satın almak istiyorum.`;
+  const wa = `https://wa.me/9${CFO.phone}?text=${encodeURIComponent(msg)}`;
+
+  // Register order
+  data.orders.push({
+    id: uid(), type, itemName, price,
+    customerName: data.user.name || '-',
+    customerPhone: data.user.phone || '',
+    note: 'WhatsApp üzerinden satın alma',
+    createdAt: new Date().toISOString(),
+  });
+  saveData();
+  if (data.orders.length === 1) renderAdminPanel();
+
+  window.open(wa, '_blank');
+  toast('WhatsApp açılıyor...', 'success');
+}
+
+// ==================== CHARTS ====================
+function renderCharts(c) {
+  if (!c) c = calc();
+  const mk = (id, cfg) => { const el = document.getElementById(id); if (!el) return null; if (charts[id]) charts[id].destroy(); charts[id] = new Chart(el, cfg); };
+
+  mk('chartIncomeExpense', { type: 'bar', data: { labels: ['Bu Dönem'], datasets: [
+    { label: 'Gelir', data: [c.totalIncome], backgroundColor: '#10b981', borderRadius: 6 },
+    { label: 'Gider', data: [c.totalExpense], backgroundColor: '#ef4444', borderRadius: 6 }
+  ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } } });
+
+  const byCat = {};
+  filtered(data.expenses).forEach(e => { byCat[e.category] = (byCat[e.category]||0) + Number(e.amount||0); });
+  const labels = Object.keys(byCat), vals = Object.values(byCat);
+  mk('chartExpensePie', { type: 'doughnut', data: { labels: labels.length ? labels : ['Veri yok'], datasets: [{ data: vals.length ? vals : [1], backgroundColor: ['#0f172a','#f59e0b','#10b981','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '60%' } });
+
+  mk('chartNetWorth', { type: 'line', data: { labels: ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu'], datasets: [{ label: 'Net Servet', data: [2100000,2180000,2250000,2320000,2400000,2480000,2550000,c.netWorth], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,.12)', fill: true, tension: .35, pointBackgroundColor: '#f59e0b', pointRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+
+  mk('chartCashflow', { type: 'bar', data: { labels: ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'], datasets: [{ label: 'Net Nakit', data: [15000,18000,20000,22000,19000,25000,21000,c.netCash,20000,22000,24000,26000], backgroundColor: '#10b981', borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+
+  mk('chartCashflowDetail', { type: 'line', data: { labels: ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu'], datasets: [
+    { label: 'Gelir', data: [90000,92000,95000,98000,100000,102000,105000,c.totalIncome], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.1)', fill: true, tension: .35 },
+    { label: 'Gider', data: [55000,56000,58000,59000,60000,61000,62000,c.totalExpense], borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.1)', fill: true, tension: .35 }
+  ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+
+  const cats = {};
+  data.investments.forEach(i => { cats[i.category] = (cats[i.category]||0) + Number(i.amount||0); });
+  mk('chartPortfolio', { type: 'doughnut', data: { labels: Object.keys(cats).length ? Object.keys(cats) : ['Veri yok'], datasets: [{ data: Object.values(cats).length ? Object.values(cats) : [1], backgroundColor: ['#0f172a','#f59e0b','#10b981','#3b82f6','#8b5cf6','#ec4899'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '60%' } });
+
+  mk('chartNetWorthDetail', { type: 'line', data: { labels: ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu'], datasets: [{ label: 'Net Servet', data: [2100000,2180000,2250000,2320000,2400000,2480000,2550000,c.netWorth], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,.12)', fill: true, tension: .35, pointBackgroundColor: '#f59e0b', pointRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+}
+
+// ==================== ALERTS & HEALTH ====================
+function renderAlerts(c) {
+  const alerts = [];
+  if (c.savingsRate < 20) alerts.push({ type:'warn', text:`Tasarruf oranınız %${c.savingsRate.toFixed(1)}. %20'nin altında.` });
+  else alerts.push({ type:'ok', text:`Tasarruf oranınız %${c.savingsRate.toFixed(1)}. İyi durumdasınız.` });
+  const em = data.emergencyFund, emTarget = em.monthly * 6, emPct = emTarget > 0 ? (em.current/emTarget*100) : 0;
+  if (emPct < 100) alerts.push({ type:'warn', text:`6 aylık acil fon hedefinizin %${emPct.toFixed(0)}'ine ulaştınız.` });
+  else alerts.push({ type:'ok', text:`6 aylık acil fon hedefinize ulaştınız.` });
+  const overdue = data.receivables.filter(r => r.due && new Date(r.due) < new Date() && r.collected < r.total);
+  if (overdue.length) { const total = overdue.reduce((s,r)=>s+(r.total-r.collected),0); alerts.push({ type:'danger', text:`Alacaklarınızın ${fmt(total)} tutarındaki kısmı vadesini geçmiştir.` }); }
+  const upcoming = data.debts.filter(d => d.due && new Date(d.due) > new Date() && new Date(d.due) < new Date(Date.now()+30*86400000));
+  if (upcoming.length) alerts.push({ type:'warn', text:`30 gün içerisinde ${upcoming.length} borç ödemeniz bulunmaktadır.` });
+  const exp = filtered(data.expenses);
+  data.budgets.forEach(b => {
+    const spent = exp.filter(e => e.category === b.category).reduce((s,x)=>s+Number(x.amount||0),0);
+    if (b.budget > 0) {
+      const pct = spent/b.budget*100;
+      if (pct >= 90 && pct < 100) alerts.push({ type:'warn', text:`${b.category} harcamanız bütçenin %${pct.toFixed(0)}'ına ulaştı.` });
+      if (pct >= 100) alerts.push({ type:'danger', text:`${b.category} bütçenizi %${pct.toFixed(0)} oranında aştınız.` });
+    }
+  });
+  const el = document.getElementById('smartAlerts'); if (!el) return;
+  el.innerHTML = alerts.map(a => {
+    const colors = { warn:'bg-amber-50 border-amber-200 text-amber-800', ok:'bg-green-50 border-green-200 text-green-800', danger:'bg-red-50 border-red-200 text-red-800' };
+    const icons = { warn:'⚠️', ok:'✓', danger:'🚨' };
+    return `<div class="border rounded-lg p-3 text-sm ${colors[a.type]} flex items-start gap-2"><span>${icons[a.type]}</span><span>${a.text}</span></div>`;
+  }).join('') || '<p class="text-sm text-slate-400">Uyarı yok.</p>';
+}
+function renderHealthScore(c) {
+  const savingsScore = Math.min(25, Math.max(0, c.savingsRate) / 40 * 25);
+  const debtRatio = c.totalIncome > 0 ? c.totalDebtPayment / c.totalIncome : 1;
+  const debtScore = Math.max(0, 20 - debtRatio * 40);
+  const emTarget = data.emergencyFund.monthly * 6, emPct = emTarget > 0 ? data.emergencyFund.current/emTarget : 0;
+  const emScore = Math.min(20, emPct * 20);
+  const invRatio = c.totalAssets > 0 ? c.totalInvestments / c.totalAssets : 0;
+  const invScore = Math.min(20, invRatio * 40);
+  const budgetScore = 15;
+  const total = savingsScore + debtScore + emScore + invScore + budgetScore;
+  const el = document.getElementById('healthScore'); if (el) el.textContent = Math.round(total);
+  const breakdown = [
+    { label:'Tasarruf', score: savingsScore, max: 25 },
+    { label:'Borç', score: debtScore, max: 20 },
+    { label:'Acil Fon', score: emScore, max: 20 },
+    { label:'Yatırım', score: invScore, max: 20 },
+    { label:'Bütçe', score: budgetScore, max: 15 },
+  ];
+  const bEl = document.getElementById('healthBreakdown'); if (!bEl) return;
+  bEl.innerHTML = breakdown.map(b => {
+    const pct = b.score / b.max * 100;
+    const cls = pct >= 70 ? '' : pct >= 40 ? 'warn' : 'danger';
+    return `<div><div class="flex justify-between text-xs mb-1"><span class="font-semibold text-slate-700">${b.label}</span><span class="text-slate-500">${b.score.toFixed(1)} / ${b.max}</span></div><div class="progress-bar"><div class="progress-fill ${cls}" style="width:${pct}%"></div></div></div>`;
+  }).join('');
+}
+
+// ==================== MODAL / CRUD ====================
+const modalFields = {
+  income: [
+    { name:'date', label:'Tarih', type:'date', required:true },
+    { name:'category', label:'Kategori', type:'select', options:['Maaş','Emekli maaşı','Freelance','Danışmanlık','Ticari gelir','Kira geliri','Faiz','Temettü','Yatırım geliri','E-ticaret','Prim','İkramiye','Diğer'], required:true },
+    { name:'description', label:'Açıklama', type:'text' },
+    { name:'account', label:'Hesap', type:'text' },
+    { name:'amount', label:'Tutar (₺)', type:'number', required:true },
+  ],
+  expense: [
+    { name:'date', label:'Tarih', type:'date', required:true },
+    { name:'category', label:'Kategori', type:'select', options:['Konut','Kira','Faturalar','Market','Ulaşım','Sağlık','Eğitim','Çocuk','Giyim','Restoran','Eğlence','Tatil','Sigorta','Vergi','Borç ödemeleri','Abonelikler','İşletme','Bağış / yardım','Diğer'], required:true },
+    { name:'description', label:'Açıklama', type:'text' },
+    { name:'type', label:'Tip', type:'select', options:['Sabit','Değişken','Zorunlu','İsteğe bağlı'] },
+    { name:'amount', label:'Tutar (₺)', type:'number', required:true },
+  ],
+  debt: [
+    { name:'name', label:'Borç Adı', type:'text', required:true },
+    { name:'creditor', label:'Alacaklı', type:'text', required:true },
+    { name:'type', label:'Tür', type:'select', options:['Banka kredisi','Kredi kartı','Şahıs borcu','Vergi','İcra','Ticari borç','Aile borcu','Diğer'], required:true },
+    { name:'total', label:'Toplam Borç (₺)', type:'number', required:true },
+    { name:'paid', label:'Ödenen (₺)', type:'number', default:0 },
+    { name:'monthly', label:'Aylık Ödeme (₺)', type:'number', required:true },
+    { name:'due', label:'Vade Tarihi', type:'date' },
+  ],
+  receivable: [
+    { name:'debtor', label:'Borçlu', type:'text', required:true },
+    { name:'description', label:'Açıklama', type:'text' },
+    { name:'total', label:'Toplam Alacak (₺)', type:'number', required:true },
+    { name:'collected', label:'Tahsil Edilen (₺)', type:'number', default:0 },
+    { name:'due', label:'Vade Tarihi', type:'date' },
+    { name:'status', label:'Durum', type:'select', options:['Bekliyor','Kısmi tahsilat','Tahsil edildi','Gecikmiş'] },
+  ],
+  asset: [
+    { name:'name', label:'Varlık Adı', type:'text', required:true },
+    { name:'category', label:'Kategori', type:'select', options:['Nakit','Banka','Altın','Gümüş','Döviz','Hisse','Fon','Kripto','Gayrimenkul','Araç','İşletme','Diğer'], required:true },
+    { name:'qty', label:'Adet', type:'number', required:true, default:1 },
+    { name:'unitValue', label:'Birim Değer (₺)', type:'number', required:true },
+  ],
+  investment: [
+    { name:'name', label:'Yatırım Adı', type:'text', required:true },
+    { name:'category', label:'Kategori', type:'select', options:['Altın','Gümüş','Döviz','Hisse','Fon','Kripto','Gayrimenkul','Diğer'], required:true },
+    { name:'cost', label:'Maliyet (₺)', type:'number', required:true },
+    { name:'amount', label:'Güncel Değer (₺)', type:'number', required:true },
+  ],
+  goal: [
+    { name:'name', label:'Hedef Adı', type:'text', required:true },
+    { name:'target', label:'Hedef Tutar (₺)', type:'number', required:true },
+    { name:'current', label:'Mevcut Tutar (₺)', type:'number', default:0 },
+    { name:'due', label:'Hedef Tarihi', type:'date' },
+    { name:'monthly', label:'Aylık Katkı (₺)', type:'number', default:0 },
+  ],
+  budget: [
+    { name:'category', label:'Kategori', type:'select', options:['Konut','Kira','Faturalar','Market','Ulaşım','Sağlık','Eğitim','Çocuk','Giyim','Restoran','Eğlence','Tatil','Sigorta','Vergi','Abonelikler','İşletme','Bağış / yardım','Diğer'], required:true },
+    { name:'budget', label:'Aylık Bütçe (₺)', type:'number', required:true },
+  ],
+  product: [
+    { name:'name', label:'Ürün Adı', type:'text', required:true },
+    { name:'price', label:'Fiyat (₺)', type:'number', required:true },
+    { name:'category', label:'Kategori', type:'text', default:'Diğer' },
+    { name:'desc', label:'Açıklama', type:'text' },
+    { name:'icon', label:'İkon (emoji)', type:'text', default:'📦' },
+  ],
+};
+
+let currentModalType = null;
+function openModal(type) {
+  currentModalType = type;
+  const fields = modalFields[type]; if (!fields) return;
+  const titles = { income:'Yeni Gelir', expense:'Yeni Gider', debt:'Yeni Borç', receivable:'Yeni Alacak', asset:'Yeni Varlık', investment:'Yeni Yatırım', goal:'Yeni Hedef', budget:'Yeni Bütçe', product:'Yeni Ürün' };
+  document.getElementById('modalTitle').textContent = titles[type] || 'Yeni Kayıt';
+  const form = document.getElementById('modalForm');
+  form.innerHTML = fields.map(f => {
+    const dv = f.default !== undefined ? `value="${f.default}"` : '';
+    if (f.type === 'select') return `<div><label>${f.label}${f.required?' *':''}</label><select name="${f.name}" ${f.required?'required':''}>${f.options.map(o=>`<option>${o}</option>`).join('')}</select></div>`;
+    return `<div><label>${f.label}${f.required?' *':''}</label><input type="${f.type}" name="${f.name}" ${f.required?'required':''} ${f.type==='number'?'step="any"':''} ${dv}></div>`;
+  }).join('') + `<button type="submit" class="btn btn-primary w-full py-3">Kaydet</button>`;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); currentModalType = null; }
+function saveModal(e) {
+  e.preventDefault();
+  const form = e.target; const obj = { id: uid() };
+  const numericFields = ['amount','total','paid','monthly','collected','qty','unitValue','cost','target','current','budget','price'];
+  new FormData(form).forEach((v,k) => { if (numericFields.includes(k)) obj[k] = Number(v) || 0; else obj[k] = v; });
+  const keyMap = { income:'incomes', expense:'expenses', debt:'debts', receivable:'receivables', asset:'assets', investment:'investments', goal:'goals', budget:'budgets', product:'marketProducts' };
+  data[keyMap[currentModalType]].push(obj);
+  saveData(); closeModal(); renderAll();
+  toast('Kayıt eklendi', 'success');
+}
+function deleteItem(key, id) {
+  if (!confirm('Bu kaydı silmek istediğinize emin misiniz?')) return;
+  data[key] = data[key].filter(x => x.id !== id);
+  saveData(); renderAll(); toast('Kayıt silindi', 'success');
+}
+
+// ==================== EXCEL ====================
+function exportExcel() {
+  const wb = XLSX.utils.book_new();
+  const c = calc();
+  const dash = [
+    ['ODAK Finans 360 - Dashboard'], ['Tarih', new Date().toLocaleString('tr-TR')], [],
+    ['GÖSTERGE', 'DEĞER'],
+    ['Toplam Varlık', c.totalAssets], ['Toplam Borç', c.totalDebt], ['Toplam Alacak', c.totalReceivable],
+    ['Net Servet', c.netWorth], ['Aylık Gelir', c.totalIncome], ['Aylık Gider', c.totalExpense],
+    ['Net Nakit Akışı', c.netCash], ['Tasarruf Oranı (%)', Number(c.savingsRate.toFixed(2))],
+    ['Aylık Borç Ödemesi', c.totalDebtPayment], ['Toplam Yatırım', c.totalInvestments],
+    [], ['CFO', CFO.name], ['Tel', CFO.phoneDisplay], ['Adres', CFO.address],
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dash), 'Dashboard');
+  const toSheet = (arr, cols) => {
+    if (!arr.length) return XLSX.utils.aoa_to_sheet([cols]);
+    return XLSX.utils.aoa_to_sheet([cols, ...arr.map(o => cols.map(k => o[k] !== undefined ? o[k] : ''))]);
+  };
+  XLSX.utils.book_append_sheet(wb, toSheet(data.incomes, ['id','date','category','description','account','amount']), 'Gelirler');
+  XLSX.utils.book_append_sheet(wb, toSheet(data.expenses, ['id','date','category','description','type','amount']), 'Giderler');
+  XLSX.utils.book_append_sheet(wb, toSheet(data.debts, ['id','name','creditor','type','total','paid','monthly','due']), 'Borçlar');
+  XLSX.utils.book_append_sheet(wb, toSheet(data.receivables, ['id','debtor','description','total','collected','status','due']), 'Alacaklar');
+  XLSX.utils.book_append_sheet(wb, toSheet(data.assets, ['id','name','category','qty','unitValue']), 'Varlıklar');
+  XLSX.utils.book_append_sheet(wb, toSheet(data.investments, ['id','name','category','cost','amount']), 'Yatırımlar');
+  XLSX.utils.book_append_sheet(wb, toSheet(data.budgets, ['id','category','budget']), 'Bütçe');
+  XLSX.utils.book_append_sheet(wb, toSheet(data.goals, ['id','name','target','current','monthly','due']), 'Hedefler');
+  XLSX.utils.book_append_sheet(wb, toSheet(data.marketProducts, ['id','name','price','category','desc']), 'Market');
+  XLSX.writeFile(wb, 'ODAK_Finans_360_' + new Date().toISOString().slice(0,10) + '.xlsx');
+  toast('Excel indirildi', 'success');
+}
+
+// ==================== REPORTS ====================
+function generateReport(type) {
+  const c = calc();
+  const el = document.getElementById('reportOutput'); if (!el) return;
+  const title = type === 'monthly' ? 'Aylık Rapor' : 'Yıllık Rapor';
+  el.innerHTML = `
+    <h4 class="font-bold text-slate-800 mb-4">${title} - ${new Date().toLocaleDateString('tr-TR')}</h4>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+      <div class="flex justify-between border-b pb-2"><span class="text-slate-500">Toplam Gelir</span><span class="font-semibold text-green-600">${fmt(c.totalIncome)}</span></div>
+      <div class="flex justify-between border-b pb-2"><span class="text-slate-500">Toplam Gider</span><span class="font-semibold text-red-500">${fmt(c.totalExpense)}</span></div>
+      <div class="flex justify-between border-b pb-2"><span class="text-slate-500">Net Tasarruf</span><span class="font-semibold">${fmt(c.totalIncome-c.totalExpense)}</span></div>
+      <div class="flex justify-between border-b pb-2"><span class="text-slate-500">Toplam Borç</span><span class="font-semibold text-red-500">${fmt(c.totalDebt)}</span></div>
+      <div class="flex justify-between border-b pb-2"><span class="text-slate-500">Toplam Alacak</span><span class="font-semibold text-green-600">${fmt(c.totalReceivable)}</span></div>
+      <div class="flex justify-between border-b pb-2"><span class="text-slate-500">Toplam Varlık</span><span class="font-semibold">${fmt(c.totalAssets)}</span></div>
+      <div class="flex justify-between border-b pb-2"><span class="text-slate-500">Net Servet</span><span class="font-semibold text-amber-500">${fmt(c.netWorth)}</span></div>
+      <div class="flex justify-between border-b pb-2"><span class="text-slate-500">Tasarruf Oranı</span><span class="font-semibold">%${c.savingsRate.toFixed(1)}</span></div>
+    </div>
+    <div class="mt-6 text-xs text-slate-500 border-t pt-3">
+      <strong>CFO:</strong> ${CFO.name} · <strong>Tel:</strong> ${CFO.phoneDisplay} · <strong>Adres:</strong> ${CFO.address}
+    </div>
+    <button onclick="window.print()" class="btn btn-primary mt-4">🖨️ Yazdır / PDF</button>
+  `;
+}
+
+// ==================== GEMINI AI ====================
+function saveGeminiKey() {
+  const k = document.getElementById('geminiKey').value.trim();
+  data.geminiKey = k; saveData();
+  toast(k ? 'API anahtarı kaydedildi' : 'Anahtar silindi', 'success');
+}
+function loadGeminiKey() {
+  const el = document.getElementById('geminiKey');
+  if (el) el.value = data.geminiKey || '';
+}
+async function testGemini() {
+  const key = data.geminiKey || document.getElementById('geminiKey').value.trim();
+  if (!key) return toast('Önce API anahtarı girin', 'error');
+  toast('Test ediliyor...', 'warn');
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: 'Merhaba, kısa bir "bağlantı başarılı" mesajı yaz.' }] }] })
+    });
+    const j = await res.json();
+    if (j.error) { toast('Hata: ' + j.error.message, 'error'); return; }
+    const text = j.candidates?.[0]?.content?.parts?.[0]?.text || 'Yanıt yok';
+    toast('✓ Bağlantı başarılı: ' + text.slice(0,60), 'success');
+  } catch(e) { toast('Bağlantı hatası: ' + e.message, 'error'); }
+}
+function buildFinancialContext() {
+  const c = calc();
+  const exp = filtered(data.expenses);
+  const inc = filtered(data.incomes);
+  const catTotals = {};
+  exp.forEach(e => { catTotals[e.category] = (catTotals[e.category]||0) + Number(e.amount||0); });
+  const topExp = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  return {
+    gelir: c.totalIncome, gider: c.totalExpense, netNakit: c.netCash,
+    tasarrufOrani: c.savingsRate.toFixed(1),
+    toplamVarlik: c.totalAssets, toplamBorc: c.totalDebt, toplamAlacak: c.totalReceivable,
+    netServet: c.netWorth, aylikBorcOdeme: c.totalDebtPayment, yatirim: c.totalInvestments,
+    fireHedef: computeFireTarget(), fireTip: FIRE_TYPES[data.fire.type]?.name || 'Regular FIRE',
+    acilFon: data.emergencyFund.current, acilFonHedef: data.emergencyFund.monthly * 6,
+    enYuksekGiderler: topExp, gelirSayisi: inc.length, giderSayisi: exp.length,
+    borçlar: data.debts.map(d => ({ ad: d.name, kalan: d.total - d.paid, aylik: d.monthly, vade: d.due })),
+    hedefler: data.goals.map(g => ({ ad: g.name, hedef: g.target, mevcut: g.current, aylik: g.monthly })),
+  };
+}
+async function runGemini(type) {
+  const key = data.geminiKey || document.getElementById('geminiKey').value.trim();
+  if (!key) return toast('Önce Gemini API anahtarı girin', 'error');
+  const el = document.getElementById('aiOutput');
+  el.innerHTML = '<div class="flex items-center gap-3"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-500"></div><span class="text-slate-500">Gemini AI düşünüyor...</span></div>';
+
+  const ctx = buildFinancialContext();
+  const prompts = {
+    summary: `Sen deneyimli bir kişisel finans danışmanısın. Aşağıdaki kullanıcı verilerini analiz ederek Türkçe, samimi ama profesyonel bir "finansal durum özeti" yaz. Kısa paragraflar ve madde işaretleri kullan. En sonda 1 cümlelik genel değerlendirme yap. Veriler: ${JSON.stringify(ctx, null, 2)}`,
+    advice: `Sen deneyimli bir finansal koçsun. Aşağıdaki kullanıcı verilerine göre 5-7 somut, uygulanabilir öneri ver. Türkçe yaz. Her öneri 1-2 cümle olsun. Kesin yatırım tavsiyesi verme, "eğitim amaçlı" olduğunu belirt. Veriler: ${JSON.stringify(ctx, null, 2)}`,
+    budget: `Sen bir bütçe analisti olarak aşağıdaki verilere göre bütçe analizi yap. Hangi kategorilerde tasarruf edilebilir, hangileri kontrol altında, hangileri riskli — Türkçe, madde işaretli olarak açıkla. Veriler: ${JSON.stringify(ctx, null, 2)}`,
+    fire: `Sen bir FIRE (Finansal Özgürlük) uzmanısın. Kullanıcının FIRE tipi: ${ctx.fireTip}, FIRE hedefi: ${ctx.fireHedef}₺, mevcut yatırım: ${ctx.yatirim}₺. Türkçe olarak FIRE yolculuğunu değerlendir, kalan süreyi tahmin et, somut adımlar öner. Kesin yatırım tavsiyesi verme. Veriler: ${JSON.stringify(ctx, null, 2)}`,
+    debt: `Sen bir borç yönetimi uzmanısın. Aşağıdaki borç verilerine göre Türkçe olarak: (1) mevcut durumu özetle, (2) borç kapatma stratejisi öner (kar topu veya çığ yöntemi), (3) somut öneriler ver. Kesin tavsiye değil, eğitim amaçlı olduğunu belirt. Veriler: ${JSON.stringify(ctx, null, 2)}`,
+  };
+  const prompt = prompts[type] || prompts.summary;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 1200 } })
+    });
+    const j = await res.json();
+    if (j.error) { el.innerHTML = `<p class="text-red-500">Hata: ${esc(j.error.message)}</p>`; return; }
+    const text = j.candidates?.[0]?.content?.parts?.[0]?.text || 'Yanıt alınamadı.';
+    el.innerHTML = `
+      <div class="prose prose-sm max-w-none">
+        <div class="text-xs text-amber-600 font-bold mb-2">🤖 Gemini AI Yanıtı</div>
+        <div class="text-slate-700 whitespace-pre-wrap leading-relaxed">${esc(text)}</div>
+        <div class="text-xs text-slate-400 mt-4 pt-3 border-t">⚠️ Bu analiz finansal eğitim amaçlıdır. Kesin yatırım tavsiyesi değildir.</div>
+      </div>
+    `;
+  } catch(e) {
+    el.innerHTML = `<p class="text-red-500">Bağlantı hatası: ${esc(e.message)}</p>`;
+  }
+}
+
+// ==================== SETTINGS ====================
+function loadSettings() {
+  document.getElementById('setName').value = data.user.name || '';
+  document.getElementById('setEmail').value = data.user.email || '';
+  document.getElementById('setPhone').value = data.user.phone || '';
+  document.getElementById('setCurrency').value = data.user.currency || 'TRY';
+  document.getElementById('setIncomeGoal').value = data.user.incomeGoal || 100000;
+  document.getElementById('setExpenseBudget').value = data.user.expenseBudget || 60000;
+}
+function saveSettings() {
+  data.user.name = document.getElementById('setName').value;
+  data.user.email = document.getElementById('setEmail').value;
+  data.user.phone = document.getElementById('setPhone').value;
+  data.user.currency = document.getElementById('setCurrency').value;
+  data.user.incomeGoal = Number(document.getElementById('setIncomeGoal').value) || 0;
+  data.user.expenseBudget = Number(document.getElementById('setExpenseBudget').value) || 0;
+  saveData();
+  document.getElementById('userGreeting').textContent = 'Hoş geldiniz, ' + data.user.name;
+  toast('Ayarlar kaydedildi', 'success');
+}
+function clearAllData() {
+  if (!confirm('Tüm verileriniz silinecek. Emin misiniz?')) return;
+  if (!confirm('Bu işlem geri alınamaz. Son onay?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  data = JSON.parse(JSON.stringify(defaultData));
+  saveData(); renderAll();
+  toast('Tüm veriler silindi', 'success');
+}
+
+// ==================== TOAST ====================
+let toastTimer = null;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast'); if (!el) return;
+  el.textContent = msg; el.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', () => {
+  const m = document.getElementById('modal');
+  if (m) m.addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+  const f = document.getElementById('dateFilterMobile');
+  if (f) f.value = 'thisMonth';
+  const fy = document.getElementById('footerYear');
+  if (fy) fy.textContent = new Date().getFullYear();
+  setLang(data.lang || 'tr');
+  // Site kapalıysa giriş ekranında uyarı
+  if (data.siteMode === 'closed') {
+    setTimeout(() => toast('⚠️ Site şu anda kapalı. Yönetici ile iletişime geçin.', 'warn'), 500);
+  }
+});
+</script>
+</body>
+</html>
