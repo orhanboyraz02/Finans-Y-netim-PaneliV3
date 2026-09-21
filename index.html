@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ODAK Finans 360</title>
+<title>ODAK Finansal Yönetim Paneli</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -63,7 +63,10 @@
   .float-info strong { color: #f59e0b; }
   .product-card { transition: all .2s; }
   .product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.1); }
-  .lock-overlay { backdrop-filter: blur(6px); background: rgba(15,23,42,.75); }
+  .pkg-card { transition: all .2s; position: relative; }
+  .pkg-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,.12); }
+  .pkg-popular { border: 2px solid #f59e0b; }
+  .pkg-popular::before { content: "EN POPÜLER"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #f59e0b; color: #fff; font-size: 10px; font-weight: 800; padding: 4px 12px; border-radius: 999px; letter-spacing: .5px; }
   @media print { .no-print { display: none !important; } .card { box-shadow: none; border: 1px solid #e2e8f0; } }
 </style>
 </head>
@@ -74,33 +77,33 @@
   <div class="card p-8 w-full max-w-md">
     <div class="text-center mb-8">
       <div class="text-5xl mb-3">💎</div>
-      <h1 class="text-3xl font-bold text-slate-800">ODAK <span class="text-amber-500">Finans 360</span></h1>
-      <p class="text-slate-500 text-sm mt-2" data-i18n="tagline">Kişisel Finans Yönetim Platformu</p>
+      <h1 class="text-2xl font-bold text-slate-800 leading-tight">ODAK <span class="text-amber-500">Finansal</span><br>Yönetim Paneli</h1>
+      <p class="text-slate-500 text-sm mt-2">Kişisel Finans Yönetim Platformu</p>
     </div>
 
     <div id="loginForm">
       <div class="space-y-4">
         <div>
-          <label data-i18n="email">E-posta</label>
+          <label>E-posta</label>
           <input type="email" id="loginEmail" value="demo@odak.com">
         </div>
         <div>
-          <label data-i18n="password">Şifre</label>
+          <label>Şifre</label>
           <input type="password" id="loginPassword" value="demo123">
         </div>
-        <button onclick="login()" class="btn btn-primary w-full py-3" data-i18n="login">Giriş Yap</button>
-        <button onclick="showRegister()" class="btn btn-outline w-full py-3" data-i18n="register">Yeni Hesap Oluştur</button>
+        <button onclick="login()" class="btn btn-primary w-full py-3">Giriş Yap</button>
+        <button onclick="showRegister()" class="btn btn-outline w-full py-3">Yeni Hesap Oluştur</button>
         <p class="text-xs text-center text-slate-400 pt-2">Demo: demo@odak.com / demo123</p>
       </div>
     </div>
 
     <div id="registerForm" class="hidden">
       <div class="space-y-4">
-        <div><label data-i18n="fullname">Ad Soyad</label><input type="text" id="regName"></div>
-        <div><label data-i18n="email">E-posta</label><input type="email" id="regEmail"></div>
-        <div><label data-i18n="password">Şifre</label><input type="password" id="regPassword"></div>
-        <button onclick="register()" class="btn btn-primary w-full py-3" data-i18n="registerBtn">Kayıt Ol</button>
-        <button onclick="showLogin()" class="btn btn-outline w-full py-3">← <span data-i18n="backToLogin">Girişe Dön</span></button>
+        <div><label>Ad Soyad</label><input type="text" id="regName"></div>
+        <div><label>E-posta</label><input type="email" id="regEmail"></div>
+        <div><label>Şifre</label><input type="password" id="regPassword"></div>
+        <button onclick="register()" class="btn btn-primary w-full py-3">Kayıt Ol</button>
+        <button onclick="showLogin()" class="btn btn-outline w-full py-3">← Girişe Dön</button>
       </div>
     </div>
 
@@ -114,57 +117,53 @@
 
 <!-- ==================== APP ==================== -->
 <div id="app" class="hidden min-h-screen">
-  <!-- SIDEBAR -->
   <aside id="sidebar" class="sidebar w-64 min-h-screen text-slate-300 fixed top-0 left-0 z-40 -translate-x-full md:translate-x-0 transition-transform overflow-y-auto no-print">
     <div class="p-5 border-b border-slate-700">
-      <h1 class="text-xl font-bold text-white">ODAK <span class="text-amber-500">360</span></h1>
-      <p class="text-xs text-slate-400 mt-1" id="userGreeting">Hoş geldiniz</p>
-      <div class="mt-2 text-xs">
-        <span id="userPlanBadge" class="badge badge-amber">FREE</span>
-      </div>
+      <h1 class="text-base font-bold text-white leading-tight">ODAK <span class="text-amber-500">Finansal</span><br>Yönetim Paneli</h1>
+      <p class="text-xs text-slate-400 mt-2" id="userGreeting">Hoş geldiniz</p>
+      <div class="mt-2"><span id="userPlanBadge" class="badge badge-amber">FREE</span></div>
     </div>
 
     <nav class="pb-8">
-      <a href="#" onclick="showPage('dashboard')" class="nav-link active flex items-center gap-3 px-5 py-2.5 text-sm" data-page="dashboard">📊 <span data-i18n="navDashboard">Dashboard</span></a>
+      <a href="#" onclick="showPage('dashboard')" class="nav-link active flex items-center gap-3 px-5 py-2.5 text-sm" data-page="dashboard">📊 Dashboard</a>
 
-      <div class="nav-section" data-i18n="navFinance">Finans</div>
-      <a href="#" onclick="showPage('income')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="income">💰 <span data-i18n="navIncome">Gelirler</span></a>
-      <a href="#" onclick="showPage('expense')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="expense">💸 <span data-i18n="navExpense">Giderler</span></a>
-      <a href="#" onclick="showPage('cashflow')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="cashflow">🔄 <span data-i18n="navCashflow">Nakit Akışı</span></a>
-      <a href="#" onclick="showPage('budget')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="budget">📋 <span data-i18n="navBudget">Bütçe</span></a>
+      <div class="nav-section">Finans</div>
+      <a href="#" onclick="showPage('income')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="income">💰 Gelirler</a>
+      <a href="#" onclick="showPage('expense')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="expense">💸 Giderler</a>
+      <a href="#" onclick="showPage('cashflow')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="cashflow">🔄 Nakit Akışı</a>
+      <a href="#" onclick="showPage('budget')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="budget">📋 Bütçe</a>
 
-      <div class="nav-section" data-i18n="navDebt">Borç & Alacak</div>
-      <a href="#" onclick="showPage('debts')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="debts">🏦 <span data-i18n="navDebts">Borçlar</span></a>
-      <a href="#" onclick="showPage('receivables')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="receivables">📥 <span data-i18n="navReceivables">Alacaklar</span></a>
-      <a href="#" onclick="showPage('calendar')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="calendar">📅 <span data-i18n="navCalendar">Ödeme Takvimi</span></a>
+      <div class="nav-section">Borç & Alacak</div>
+      <a href="#" onclick="showPage('debts')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="debts">🏦 Borçlar</a>
+      <a href="#" onclick="showPage('receivables')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="receivables">📥 Alacaklar</a>
+      <a href="#" onclick="showPage('calendar')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="calendar">📅 Ödeme Takvimi</a>
 
-      <div class="nav-section" data-i18n="navAsset">Varlık & Yatırım</div>
-      <a href="#" onclick="showPage('assets')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="assets">🏠 <span data-i18n="navAssets">Varlıklar</span></a>
-      <a href="#" onclick="showPage('investments')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="investments">📈 <span data-i18n="navInvestments">Yatırımlar</span></a>
-      <a href="#" onclick="showPage('networth')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="networth">💎 <span data-i18n="navNetworth">Net Servet</span></a>
+      <div class="nav-section">Varlık & Yatırım</div>
+      <a href="#" onclick="showPage('assets')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="assets">🏠 Varlıklar</a>
+      <a href="#" onclick="showPage('investments')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="investments">📈 Yatırımlar</a>
+      <a href="#" onclick="showPage('networth')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="networth">💎 Net Servet</a>
 
-      <div class="nav-section" data-i18n="navPlanning">Planlama</div>
-      <a href="#" onclick="showPage('goals')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="goals">🎯 <span data-i18n="navGoals">Hedefler</span></a>
-      <a href="#" onclick="showPage('emergency')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="emergency">🛡️ <span data-i18n="navEmergency">Acil Fon</span></a>
-      <a href="#" onclick="showPage('plan12')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="plan12">📆 <span data-i18n="navPlan12">12 Aylık Plan</span></a>
-      <a href="#" onclick="showPage('fire')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="fire">🔥 <span data-i18n="navFire">FIRE</span></a>
+      <div class="nav-section">Planlama</div>
+      <a href="#" onclick="showPage('goals')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="goals">🎯 Hedefler</a>
+      <a href="#" onclick="showPage('emergency')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="emergency">🛡️ Acil Fon</a>
+      <a href="#" onclick="showPage('plan12')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="plan12">📆 12 Aylık Plan</a>
+      <a href="#" onclick="showPage('fire')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="fire">🔥 FIRE</a>
 
-      <div class="nav-section" data-i18n="navMarket">Market & Paketler</div>
-      <a href="#" onclick="showPage('market')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="market">🛒 <span data-i18n="navMarket">Market (12 Ürün)</span></a>
-      <a href="#" onclick="showPage('packages')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="packages">📦 <span data-i18n="navPackages">Kullanıcı Paketleri</span></a>
-      <a href="#" onclick="showPage('consulting')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="consulting">💼 <span data-i18n="navConsulting">Danışmanlık</span></a>
+      <div class="nav-section">Market & Paketler</div>
+      <a href="#" onclick="showPage('market')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="market">🛒 Market (12 Ürün)</a>
+      <a href="#" onclick="showPage('packages')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="packages">📦 Kullanıcı Paketleri</a>
+      <a href="#" onclick="showPage('consulting')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="consulting">💼 Danışmanlık</a>
 
-      <div class="nav-section" data-i18n="navOther">Diğer</div>
-      <a href="#" onclick="showPage('reports')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="reports">📄 <span data-i18n="navReports">Raporlar</span></a>
-      <a href="#" onclick="showPage('ai')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="ai">🤖 <span data-i18n="navAi">AI Asistan (Gemini)</span></a>
-      <a href="#" onclick="showPage('settings')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="settings">⚙️ <span data-i18n="navSettings">Ayarlar</span></a>
-      <a href="#" onclick="logout()" class="flex items-center gap-3 px-5 py-2.5 text-sm text-red-400 hover:bg-red-900/20">🚪 <span data-i18n="navLogout">Çıkış</span></a>
+      <div class="nav-section">Diğer</div>
+      <a href="#" onclick="showPage('reports')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="reports">📄 Raporlar</a>
+      <a href="#" onclick="showPage('ai')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="ai">🤖 AI Asistan (Gemini)</a>
+      <a href="#" onclick="showPage('settings')" class="nav-link flex items-center gap-3 px-5 py-2.5 text-sm" data-page="settings">⚙️ Ayarlar</a>
+      <a href="#" onclick="logout()" class="flex items-center gap-3 px-5 py-2.5 text-sm text-red-400 hover:bg-red-900/20">🚪 Çıkış</a>
     </nav>
   </aside>
 
   <div id="sidebarOverlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black/50 z-30 md:hidden"></div>
 
-  <!-- MAIN -->
   <main class="md:ml-64 min-h-screen flex flex-col">
     <header class="bg-white border-b border-slate-200 px-4 md:px-6 py-4 flex items-center justify-between sticky top-0 z-20 no-print">
       <div class="flex items-center gap-3">
@@ -255,7 +254,7 @@
       <!-- ============ INCOME ============ -->
       <div id="page-income" class="page">
         <div class="flex justify-between items-center mb-5">
-          <h3 class="text-lg font-bold text-slate-800">Gelirler</h3>
+          <h3 class="text-lg font-bold text-slate-800">💰 Gelirler</h3>
           <button onclick="openModal('income')" class="btn btn-primary">+ Yeni Gelir</button>
         </div>
         <div class="card overflow-x-auto"><table><thead><tr><th>Tarih</th><th>Kategori</th><th>Açıklama</th><th>Hesap</th><th class="text-right">Tutar</th><th>İşlem</th></tr></thead><tbody id="incomeTable"></tbody></table></div>
@@ -264,7 +263,7 @@
       <!-- ============ EXPENSE ============ -->
       <div id="page-expense" class="page">
         <div class="flex justify-between items-center mb-5">
-          <h3 class="text-lg font-bold text-slate-800">Giderler</h3>
+          <h3 class="text-lg font-bold text-slate-800">💸 Giderler</h3>
           <button onclick="openModal('expense')" class="btn btn-primary">+ Yeni Gider</button>
         </div>
         <div class="card overflow-x-auto"><table><thead><tr><th>Tarih</th><th>Kategori</th><th>Açıklama</th><th>Tip</th><th class="text-right">Tutar</th><th>İşlem</th></tr></thead><tbody id="expenseTable"></tbody></table></div>
@@ -272,7 +271,7 @@
 
       <!-- ============ CASHFLOW ============ -->
       <div id="page-cashflow" class="page">
-        <h3 class="text-lg font-bold text-slate-800 mb-5">Nakit Akışı</h3>
+        <h3 class="text-lg font-bold text-slate-800 mb-5">🔄 Nakit Akışı</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
           <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Toplam Gelir</p><p class="text-2xl font-bold text-green-600 mt-2" id="cfIncome">₺0</p></div>
           <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Toplam Gider</p><p class="text-2xl font-bold text-red-500 mt-2" id="cfExpense">₺0</p></div>
@@ -284,7 +283,7 @@
       <!-- ============ BUDGET ============ -->
       <div id="page-budget" class="page">
         <div class="flex justify-between items-center mb-5">
-          <h3 class="text-lg font-bold text-slate-800">Bütçe</h3>
+          <h3 class="text-lg font-bold text-slate-800">📋 Bütçe</h3>
           <button onclick="openModal('budget')" class="btn btn-primary">+ Bütçe Ekle</button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="budgetGrid"></div>
@@ -293,7 +292,7 @@
       <!-- ============ DEBTS ============ -->
       <div id="page-debts" class="page">
         <div class="flex justify-between items-center mb-5">
-          <h3 class="text-lg font-bold text-slate-800">Borçlar</h3>
+          <h3 class="text-lg font-bold text-slate-800">🏦 Borçlar</h3>
           <button onclick="openModal('debt')" class="btn btn-primary">+ Yeni Borç</button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
@@ -307,7 +306,7 @@
       <!-- ============ RECEIVABLES ============ -->
       <div id="page-receivables" class="page">
         <div class="flex justify-between items-center mb-5">
-          <h3 class="text-lg font-bold text-slate-800">Alacaklar</h3>
+          <h3 class="text-lg font-bold text-slate-800">📥 Alacaklar</h3>
           <button onclick="openModal('receivable')" class="btn btn-primary">+ Yeni Alacak</button>
         </div>
         <div class="card overflow-x-auto"><table><thead><tr><th>Borçlu</th><th>Açıklama</th><th class="text-right">Toplam</th><th class="text-right">Tahsil</th><th class="text-right">Kalan</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="receivableTable"></tbody></table></div>
@@ -315,7 +314,7 @@
 
       <!-- ============ CALENDAR ============ -->
       <div id="page-calendar" class="page">
-        <h3 class="text-lg font-bold text-slate-800 mb-5">Ödeme Takvimi</h3>
+        <h3 class="text-lg font-bold text-slate-800 mb-5">📅 Ödeme Takvimi</h3>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
           <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Bugün</p><div id="calToday" class="mt-3 space-y-2"></div></div>
           <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">7 Gün İçinde</p><div id="cal7" class="mt-3 space-y-2"></div></div>
@@ -327,7 +326,7 @@
       <!-- ============ ASSETS ============ -->
       <div id="page-assets" class="page">
         <div class="flex justify-between items-center mb-5">
-          <h3 class="text-lg font-bold text-slate-800">Varlıklar</h3>
+          <h3 class="text-lg font-bold text-slate-800">🏠 Varlıklar</h3>
           <button onclick="openModal('asset')" class="btn btn-primary">+ Yeni Varlık</button>
         </div>
         <div class="card p-5 mb-5"><p class="text-xs text-slate-500 uppercase font-bold">Toplam Varlık Değeri</p><p class="text-3xl font-bold text-slate-800 mt-2" id="assetTotal">₺0</p></div>
@@ -337,7 +336,7 @@
       <!-- ============ INVESTMENTS ============ -->
       <div id="page-investments" class="page">
         <div class="flex justify-between items-center mb-5">
-          <h3 class="text-lg font-bold text-slate-800">Yatırım Portföyü</h3>
+          <h3 class="text-lg font-bold text-slate-800">📈 Yatırım Portföyü</h3>
           <button onclick="openModal('investment')" class="btn btn-primary">+ Yeni Yatırım</button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
@@ -351,7 +350,7 @@
 
       <!-- ============ NETWORTH ============ -->
       <div id="page-networth" class="page">
-        <h3 class="text-lg font-bold text-slate-800 mb-5">Net Servet</h3>
+        <h3 class="text-lg font-bold text-slate-800 mb-5">💎 Net Servet</h3>
         <div class="card p-6 mb-5 bg-gradient-to-br from-slate-800 to-slate-900 text-white">
           <p class="text-xs text-amber-400 uppercase font-bold">Net Servet</p>
           <p class="text-4xl font-bold mt-2" id="nwTotal">₺0</p>
@@ -363,7 +362,7 @@
       <!-- ============ GOALS ============ -->
       <div id="page-goals" class="page">
         <div class="flex justify-between items-center mb-5">
-          <h3 class="text-lg font-bold text-slate-800">Finansal Hedefler</h3>
+          <h3 class="text-lg font-bold text-slate-800">🎯 Finansal Hedefler</h3>
           <button onclick="openModal('goal')" class="btn btn-primary">+ Yeni Hedef</button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="goalsGrid"></div>
@@ -371,33 +370,45 @@
 
       <!-- ============ EMERGENCY ============ -->
       <div id="page-emergency" class="page">
-        <h3 class="text-lg font-bold text-slate-800 mb-5">Acil Durum Fonu</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-          <div class="card p-5"><label>Aylık Zorunlu Gider (₺)</label><input type="number" id="emMonthly" onchange="renderEmergency()"></div>
-          <div class="card p-5"><label>Mevcut Acil Fon (₺)</label><input type="number" id="emCurrent" onchange="renderEmergency()"></div>
+        <div class="mb-5">
+          <h3 class="text-lg font-bold text-slate-800">🛡️ Acil Durum Fonu</h3>
+          <p class="text-sm text-slate-500">Aylık zorunlu giderlerinizi girin, sistem otomatik 3/6/12 aylık hedefleri hesaplasın.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="card p-5">
+            <label>Aylık Zorunlu Gider (₺)</label>
+            <input type="number" id="emMonthly" placeholder="50000">
+            <p class="text-xs text-slate-400 mt-1">Kira, faturalar, market, ulaşım toplamı</p>
+          </div>
+          <div class="card p-5">
+            <label>Mevcut Acil Fon (₺)</label>
+            <input type="number" id="emCurrent" placeholder="0">
+            <p class="text-xs text-slate-400 mt-1">Acil durumlar için ayırdığınız birikim</p>
+          </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="emGrid"></div>
+        <div class="card p-5 mt-6 bg-amber-50 border border-amber-200">
+          <h4 class="font-bold text-amber-800 mb-2">💡 Acil Fon Nedir?</h4>
+          <p class="text-sm text-amber-700">Acil durum fonu, beklenmedik bir iş kaybı, sağlık sorunu veya acil tamir durumunda 3-12 ay boyunca yaşamınızı sürdürebilmeniz için ayrılan birikimdir. Uzmanlar genellikle <strong>6 aylık</strong> gideri önerir.</p>
+        </div>
       </div>
 
       <!-- ============ PLAN12 ============ -->
       <div id="page-plan12" class="page">
-        <h3 class="text-lg font-bold text-slate-800 mb-5">12 Aylık Finansal Plan</h3>
+        <h3 class="text-lg font-bold text-slate-800 mb-5">📆 12 Aylık Finansal Plan</h3>
         <div class="card overflow-x-auto"><table><thead><tr><th>Ay</th><th class="text-right">Gelir Hedefi</th><th class="text-right">Gider Bütçesi</th><th class="text-right">Borç Ödemesi</th><th class="text-right">Yatırım</th><th class="text-right">Tasarruf</th></tr></thead><tbody id="plan12Table"></tbody></table></div>
       </div>
 
       <!-- ============ FIRE ============ -->
       <div id="page-fire" class="page">
         <h3 class="text-lg font-bold text-slate-800 mb-5">🔥 FIRE - Finansal Özgürlük</h3>
-
-        <!-- FIRE Type Selector -->
         <div class="card p-5 mb-5">
           <label>FIRE Çeşidi</label>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2" id="fireTypeGrid"></div>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2" id="fireTypeGrid"></div>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-          <div class="card p-5"><label>Aylık Yaşam Gideri (₺)</label><input type="number" id="fireMonthly" onchange="renderFire()"></div>
-          <div class="card p-5"><label>Güvenli Çekim Oranı (%)</label><input type="number" id="fireRate" onchange="renderFire()"></div>
+          <div class="card p-5"><label>Aylık Yaşam Gideri (₺)</label><input type="number" id="fireMonthly"></div>
+          <div class="card p-5"><label>Güvenli Çekim Oranı (%)</label><input type="number" id="fireRate"></div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
           <div class="card p-5 bg-slate-800 text-white"><p class="text-xs text-amber-400 uppercase font-bold">FIRE Hedefi</p><p class="text-xl font-bold mt-2" id="fireTarget">₺0</p></div>
@@ -412,7 +423,10 @@
       <!-- ============ MARKET ============ -->
       <div id="page-market" class="page">
         <div class="flex justify-between items-center mb-5">
-          <h3 class="text-lg font-bold text-slate-800">🛒 Market — 12 Dijital Ürün</h3>
+          <div>
+            <h3 class="text-lg font-bold text-slate-800">🛒 Market — 12 Dijital Ürün</h3>
+            <p class="text-sm text-slate-500">WhatsApp ile hızlı satın alma</p>
+          </div>
           <button onclick="openModal('product')" class="btn btn-primary">+ Ürün Ekle</button>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="marketGrid"></div>
@@ -420,19 +434,25 @@
 
       <!-- ============ PACKAGES ============ -->
       <div id="page-packages" class="page">
-        <h3 class="text-lg font-bold text-slate-800 mb-5">📦 Kullanıcı Paketleri</h3>
+        <div class="mb-5">
+          <h3 class="text-lg font-bold text-slate-800">📦 Kullanıcı Paketleri</h3>
+          <p class="text-sm text-slate-500">Size uygun paketi seçin, WhatsApp ile hemen başvurun</p>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="userPackagesGrid"></div>
       </div>
 
       <!-- ============ CONSULTING ============ -->
       <div id="page-consulting" class="page">
-        <h3 class="text-lg font-bold text-slate-800 mb-5">💼 Danışmanlık Paketleri</h3>
+        <div class="mb-5">
+          <h3 class="text-lg font-bold text-slate-800">💼 Danışmanlık Paketleri</h3>
+          <p class="text-sm text-slate-500">Kişisel finans danışmanlığı için WhatsApp ile iletişime geçin</p>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="consultingGrid"></div>
       </div>
 
       <!-- ============ REPORTS ============ -->
       <div id="page-reports" class="page">
-        <h3 class="text-lg font-bold text-slate-800 mb-5">Raporlar</h3>
+        <h3 class="text-lg font-bold text-slate-800 mb-5">📄 Raporlar</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
           <div class="card p-6 text-center"><div class="text-4xl mb-3">📊</div><h4 class="font-bold text-slate-800 mb-2">Aylık Rapor</h4><p class="text-xs text-slate-500 mb-4">Bu ayın finansal özeti</p><button onclick="generateReport('monthly')" class="btn btn-primary w-full">Oluştur</button></div>
           <div class="card p-6 text-center"><div class="text-4xl mb-3">📈</div><h4 class="font-bold text-slate-800 mb-2">Yıllık Rapor</h4><p class="text-xs text-slate-500 mb-4">Yıllık finansal analiz</p><button onclick="generateReport('yearly')" class="btn btn-primary w-full">Oluştur</button></div>
@@ -441,25 +461,20 @@
         <div class="card p-5" id="reportOutput"></div>
       </div>
 
-      <!-- ============ AI (GEMINI) ============ -->
+      <!-- ============ AI ============ -->
       <div id="page-ai" class="page">
         <h3 class="text-lg font-bold text-slate-800 mb-5">🤖 AI Finans Asistanı (Gemini)</h3>
-
         <div class="card p-5 mb-5">
           <label>Google Gemini API Anahtarı</label>
           <input type="password" id="geminiKey" placeholder="AIza...">
-          <p class="text-xs text-slate-500 mt-2">
-            Anahtarınızı <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-amber-600 underline">Google AI Studio</a>'dan ücretsiz alabilirsiniz.
-            Anahtar yalnızca tarayıcınızda saklanır, sunucuya gönderilmez.
-          </p>
+          <p class="text-xs text-slate-500 mt-2">Anahtarınızı <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-amber-600 underline">Google AI Studio</a>'dan ücretsiz alabilirsiniz. Yalnızca tarayıcınızda saklanır.</p>
           <div class="flex gap-2 mt-3">
             <button onclick="saveGeminiKey()" class="btn btn-primary">Anahtarı Kaydet</button>
             <button onclick="testGemini()" class="btn btn-outline">Bağlantıyı Test Et</button>
           </div>
         </div>
-
         <div class="card p-5 mb-5">
-          <p class="text-sm text-slate-600 mb-4">Finansal verilerinizi Gemini AI ile analiz ettirin ve kişiselleştirilmiş öneriler alın.</p>
+          <p class="text-sm text-slate-600 mb-4">Finansal verilerinizi Gemini AI ile analiz ettirin.</p>
           <div class="flex gap-2 flex-wrap">
             <button onclick="runGemini('summary')" class="btn btn-primary">📊 Genel Özet</button>
             <button onclick="runGemini('advice')" class="btn btn-amber">💡 Öneriler</button>
@@ -468,16 +483,13 @@
             <button onclick="runGemini('debt')" class="btn btn-outline">🏦 Borç Stratejisi</button>
           </div>
         </div>
-
-        <div class="card p-5" id="aiOutput">
-          <p class="text-sm text-slate-400">Analiz için yukarıdaki butonlardan birine tıklayın.</p>
-        </div>
+        <div class="card p-5" id="aiOutput"><p class="text-sm text-slate-400">Analiz için yukarıdaki butonlardan birine tıklayın.</p></div>
         <p class="text-xs text-slate-400 mt-3">⚠️ AI kesin yatırım tavsiyesi vermez. Finansal kararlarınızı kendiniz verirsiniz.</p>
       </div>
 
       <!-- ============ SETTINGS ============ -->
       <div id="page-settings" class="page">
-        <h3 class="text-lg font-bold text-slate-800 mb-5">Ayarlar</h3>
+        <h3 class="text-lg font-bold text-slate-800 mb-5">⚙️ Ayarlar</h3>
         <div class="card p-6 max-w-2xl">
           <div class="space-y-4">
             <div><label>Ad Soyad</label><input type="text" id="setName"></div>
@@ -496,11 +508,11 @@
 
     </div>
 
-    <!-- ==================== FOOTER ==================== -->
+    <!-- FOOTER -->
     <footer class="bg-slate-900 text-slate-300 px-6 py-6 mt-6 no-print">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
         <div>
-          <h4 class="font-bold text-white mb-2">💎 ODAK Finans 360</h4>
+          <h4 class="font-bold text-white mb-2">💎 ODAK Finansal Yönetim Paneli</h4>
           <p class="text-xs text-slate-400">Kişisel finans, gelir-gider, borç-alacak ve finansal özgürlük yönetim platformu.</p>
         </div>
         <div>
@@ -508,13 +520,11 @@
           <p class="text-xs"><strong>CFO:</strong> Orhan Boyraz</p>
           <p class="text-xs"><strong>Tel:</strong> <a href="tel:+905409666602" class="text-amber-400 hover:underline">0540 966 66 02</a></p>
           <p class="text-xs"><strong>Adres:</strong> Bursa / Türkiye</p>
-          <p class="text-xs mt-2">
-            <a href="https://wa.me/905409666602" target="_blank" class="inline-flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">💬 WhatsApp</a>
-          </p>
+          <p class="text-xs mt-2"><a href="https://wa.me/905409666602" target="_blank" class="inline-flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">💬 WhatsApp</a></p>
         </div>
         <div>
           <h4 class="font-bold text-white mb-2">ℹ️ Bilgi</h4>
-          <p class="text-xs text-slate-400">© <span id="footerYear"></span> ODAK Finans 360. Tüm hakları saklıdır.</p>
+          <p class="text-xs text-slate-400">© <span id="footerYear"></span> ODAK Finansal Yönetim Paneli</p>
           <p class="text-xs text-slate-400 mt-2">Verileriniz tarayıcınızda saklanır.</p>
         </div>
       </div>
@@ -522,7 +532,7 @@
   </main>
 </div>
 
-<!-- ==================== MODAL ==================== -->
+<!-- MODAL -->
 <div id="modal" class="modal-overlay">
   <div class="card p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
     <div class="flex justify-between items-center mb-5">
@@ -533,7 +543,7 @@
   </div>
 </div>
 
-<!-- ==================== ADMIN LOGIN ==================== -->
+<!-- ADMIN LOGIN -->
 <div id="adminLoginModal" class="modal-overlay">
   <div class="card p-6 w-full max-w-sm">
     <h3 class="text-lg font-bold text-slate-800 mb-4">🔒 Admin Girişi</h3>
@@ -549,22 +559,21 @@
   </div>
 </div>
 
-<!-- ==================== ADMIN PANEL ==================== -->
+<!-- ADMIN PANEL -->
 <div id="adminPanel" class="hidden min-h-screen bg-slate-100">
   <header class="bg-red-900 text-white px-6 py-4 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <span class="text-2xl">🔒</span>
       <div>
-        <h1 class="text-lg font-bold">ODAK Finans 360 — Yönetim Paneli</h1>
-        <p class="text-xs text-red-200">Şifreli erişim · admin@odak.com</p>
+        <h1 class="text-lg font-bold">ODAK Finansal Yönetim Paneli — Admin</h1>
+        <p class="text-xs text-red-200">Şifreli erişim</p>
       </div>
     </div>
     <div class="flex gap-2">
-      <button onclick="toggleSiteMode()" id="siteModeBtn" class="btn bg-amber-500 hover:bg-amber-600 text-white">🟢 Site: Açık</button>
+      <button onclick="toggleSiteMode()" id="siteModeBtn" class="btn bg-green-600 text-white">🟢 Site: Açık</button>
       <button onclick="adminLogout()" class="btn btn-outline bg-white/10 text-white border-white/30">Çıkış</button>
     </div>
   </header>
-
   <div class="p-6">
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Toplam Kullanıcı</p><p class="text-2xl font-bold text-slate-800 mt-2" id="admUsers">0</p></div>
@@ -572,7 +581,6 @@
       <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Market Ürünü</p><p class="text-2xl font-bold text-amber-600 mt-2" id="admProducts">0</p></div>
       <div class="card p-5"><p class="text-xs text-slate-500 uppercase font-bold">Bekleyen Sipariş</p><p class="text-2xl font-bold text-red-500 mt-2" id="admOrders">0</p></div>
     </div>
-
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <div class="card p-5">
         <h3 class="font-bold text-slate-800 mb-4">📦 Market Ürünleri (Ekle/Sil)</h3>
@@ -583,15 +591,13 @@
         </div>
         <div id="admProductList" class="space-y-2 max-h-80 overflow-y-auto"></div>
       </div>
-
       <div class="card p-5">
         <h3 class="font-bold text-slate-800 mb-4">👥 Kayıtlı Kullanıcılar</h3>
         <div id="admUserList" class="space-y-2 max-h-80 overflow-y-auto"></div>
       </div>
     </div>
-
     <div class="card p-5">
-      <h3 class="font-bold text-slate-800 mb-4">📋 Siparişler / İletişim Talepleri (WhatsApp)</h3>
+      <h3 class="font-bold text-slate-800 mb-4">📋 Siparişler / WhatsApp Talepleri</h3>
       <div id="admOrderList" class="space-y-2 max-h-96 overflow-y-auto"></div>
     </div>
   </div>
@@ -599,7 +605,6 @@
 
 <div id="toast" class="toast"></div>
 
-<!-- FLOATING INFO - CFO Contact -->
 <div class="float-info no-print" id="floatInfo">
   <div class="flex items-start gap-2">
     <span class="text-lg">💼</span>
@@ -615,40 +620,10 @@
 
 <script>
 /* ============================================================
-   ODAK Finans 360 — v3
-   Tüm özellikler tek dosyada.
+   ODAK Finansal Yönetim Paneli — v4
    ============================================================ */
 
-// ==================== TRANSLATIONS ====================
-const I18N = {
-  tr: {
-    tagline:'Kişisel Finans Yönetim Platformu', email:'E-posta', password:'Şifre', login:'Giriş Yap',
-    register:'Yeni Hesap Oluştur', registerBtn:'Kayıt Ol', fullname:'Ad Soyad', backToLogin:'Girişe Dön',
-    navDashboard:'Dashboard', navFinance:'Finans', navIncome:'Gelirler', navExpense:'Giderler',
-    navCashflow:'Nakit Akışı', navBudget:'Bütçe', navDebt:'Borç & Alacak', navDebts:'Borçlar',
-    navReceivables:'Alacaklar', navCalendar:'Ödeme Takvimi', navAsset:'Varlık & Yatırım',
-    navAssets:'Varlıklar', navInvestments:'Yatırımlar', navNetworth:'Net Servet',
-    navPlanning:'Planlama', navGoals:'Hedefler', navEmergency:'Acil Fon', navPlan12:'12 Aylık Plan',
-    navFire:'FIRE', navMarket:'Market & Paketler', navPackages:'Kullanıcı Paketleri',
-    navConsulting:'Danışmanlık', navOther:'Diğer', navReports:'Raporlar', navAi:'AI Asistan (Gemini)',
-    navSettings:'Ayarlar', navLogout:'Çıkış'
-  },
-  en: {
-    tagline:'Personal Finance Management Platform', email:'Email', password:'Password', login:'Sign In',
-    register:'Create New Account', registerBtn:'Register', fullname:'Full Name', backToLogin:'Back to Login',
-    navDashboard:'Dashboard', navFinance:'Finance', navIncome:'Income', navExpense:'Expenses',
-    navCashflow:'Cash Flow', navBudget:'Budget', navDebt:'Debt & Receivables', navDebts:'Debts',
-    navReceivables:'Receivables', navCalendar:'Payment Calendar', navAsset:'Assets & Investment',
-    navAssets:'Assets', navInvestments:'Investments', navNetworth:'Net Worth',
-    navPlanning:'Planning', navGoals:'Goals', navEmergency:'Emergency Fund', navPlan12:'12 Month Plan',
-    navFire:'FIRE', navMarket:'Market & Packages', navPackages:'User Packages',
-    navConsulting:'Consulting', navOther:'Other', navReports:'Reports', navAi:'AI Assistant (Gemini)',
-    navSettings:'Settings', navLogout:'Logout'
-  }
-};
-
-// ==================== DATA ====================
-const STORAGE_KEY = 'odak_finans_360_v3';
+const STORAGE_KEY = 'odak_finansal_yonetim_v4';
 const ADMIN_CREDS = { user: 'admin', pass: 'odak2026' };
 const CFO = { name: 'Orhan Boyraz', phone: '05409666602', phoneDisplay: '0540 966 66 02', address: 'Bursa / Türkiye' };
 
@@ -669,13 +644,13 @@ const DEFAULT_MARKET_PRODUCTS = [
   { id: 9, name: 'Gayrimenkul Yatırım Rehberi', price: 349, category: 'Rehber', desc: 'Konut alım-satım taktikleri', icon: '🏠' },
   { id: 10, name: 'Pasif Gelir Fikirleri', price: 159, category: 'E-Kitap', desc: '25 pasif gelir modeli', icon: '💡' },
   { id: 11, name: 'Vergi Optimizasyon Rehberi', price: 279, category: 'Rehber', desc: 'Yasal vergi tasarrufu', icon: '📑' },
-  { id: 12, name: 'Finansal Özgürlük Danışmanlık Mini', price: 899, category: 'Danışmanlık', desc: '60 dk online görüşme', icon: '💼' },
+  { id: 12, name: 'Finansal Özgürlük Mini Danışmanlık', price: 899, category: 'Danışmanlık', desc: '60 dk online görüşme', icon: '💼' },
 ];
 
 const DEFAULT_USER_PACKAGES = [
   { id: 'free', name: 'FREE', price: 0, period: 'aylık', features: ['Gelir-gider takibi','Temel dashboard','Bütçe','Excel export'], color: 'slate' },
   { id: 'standard', name: 'STANDARD', price: 99, period: 'aylık', features: ['FREE + Borç-alacak','Ödeme takvimi','Finansal hedefler','Acil fon'], color: 'blue' },
-  { id: 'pro', name: 'PRO', price: 249, period: 'aylık', features: ['STANDARD + Yatırım','FIRE analizi','Gelişmiş raporlar','PDF export','Excel import'], color: 'amber' },
+  { id: 'pro', name: 'PRO', price: 249, period: 'aylık', features: ['STANDARD + Yatırım','FIRE analizi','Gelişmiş raporlar','PDF export','Excel import'], color: 'amber', popular: true },
   { id: 'vip', name: 'VIP', price: 599, period: 'aylık', features: ['PRO + Gemini AI asistan','Kişisel finans raporu','Öncelikli destek','Sınırsız danışmanlık'], color: 'purple' },
 ];
 
@@ -749,31 +724,16 @@ function uid() { return Date.now() + Math.floor(Math.random()*10000); }
 function fmt(n) { return '₺' + Number(n||0).toLocaleString('tr-TR', {maximumFractionDigits:0}); }
 function esc(s) { return String(s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c])); }
 
-// ==================== LANGUAGE ====================
+// ==================== LANG ====================
 function setLang(lang) {
   data.lang = lang; saveData();
   document.documentElement.lang = lang;
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const k = el.dataset.i18n;
-    if (I18N[lang] && I18N[lang][k]) el.textContent = I18N[lang][k];
-  });
-  const sel = document.getElementById('langSelect');
-  if (sel) sel.value = lang;
-  const t = { thisMonth:'Bu Ay', lastMonth:'Geçen Ay', last3:'Son 3 Ay', last6:'Son 6 Ay', thisYear:'Bu Yıl', lastYear:'Geçen Yıl', all:'Tümü' };
-  if (lang === 'en') {
-    const tEn = { thisMonth:'This Month', lastMonth:'Last Month', last3:'Last 3 Months', last6:'Last 6 Months', thisYear:'This Year', lastYear:'Last Year', all:'All' };
-    Object.keys(tEn).forEach(k => {
-      const opt = document.querySelector(`#dateFilter option[value="${k}"]`);
-      if (opt) opt.textContent = tEn[k];
-      const opt2 = document.querySelector(`#dateFilterMobile option[value="${k}"]`);
-      if (opt2) opt2.textContent = tEn[k];
-    });
-  }
+  const sel = document.getElementById('langSelect'); if (sel) sel.value = lang;
 }
 
 // ==================== AUTH ====================
 function login() {
-  if (data.siteMode === 'closed') { toast('Site şu anda kapalı. Lütfen daha sonra tekrar deneyin.', 'error'); return; }
+  if (data.siteMode === 'closed') { toast('Site şu anda kapalı.', 'error'); return; }
   const email = document.getElementById('loginEmail').value.trim();
   const pw = document.getElementById('loginPassword').value;
   if (!email || !pw) return toast('E-posta ve şifre gerekli', 'error');
@@ -782,9 +742,8 @@ function login() {
   document.getElementById('app').classList.remove('hidden');
   document.getElementById('userGreeting').textContent = 'Hoş geldiniz, ' + (data.user.name || 'Kullanıcı');
   const planBadge = document.getElementById('userPlanBadge');
-  if (planBadge) { planBadge.textContent = (data.user.plan || 'free').toUpperCase(); }
+  if (planBadge) planBadge.textContent = (data.user.plan || 'free').toUpperCase();
   document.getElementById('footerYear').textContent = new Date().getFullYear();
-  setLang(data.lang || 'tr');
   renderAll();
   toast('Giriş başarılı', 'success');
 }
@@ -799,11 +758,10 @@ function register() {
   data.siteUsers.push({ id: uid(), name, email, password: pw, plan: 'free', createdAt: new Date().toISOString() });
   data.adminUsers.push({ id: uid(), name, email, plan: 'free', createdAt: new Date().toISOString() });
   data.user.name = name; data.user.email = email;
-  saveData();
-  showLogin();
+  saveData(); showLogin();
   document.getElementById('loginEmail').value = email;
   document.getElementById('loginPassword').value = '';
-  toast('Hesap oluşturuldu, giriş yapabilirsiniz', 'success');
+  toast('Hesap oluşturuldu', 'success');
 }
 function logout() {
   if (!confirm('Çıkış yapmak istediğinize emin misiniz?')) return;
@@ -811,8 +769,7 @@ function logout() {
   document.getElementById('loginScreen').classList.remove('hidden');
 }
 function toggleSidebar() {
-  const sb = document.getElementById('sidebar');
-  const ov = document.getElementById('sidebarOverlay');
+  const sb = document.getElementById('sidebar'), ov = document.getElementById('sidebarOverlay');
   const hidden = sb.classList.contains('-translate-x-full');
   if (hidden) { sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden'); }
   else { sb.classList.add('-translate-x-full'); ov.classList.add('hidden'); }
@@ -831,9 +788,7 @@ function adminLogin() {
     document.getElementById('adminPanel').classList.remove('hidden');
     renderAdminPanel();
     toast('Admin girişi başarılı', 'success');
-  } else {
-    toast('Kullanıcı adı veya şifre hatalı', 'error');
-  }
+  } else toast('Kullanıcı adı veya şifre hatalı', 'error');
 }
 function adminLogout() {
   adminLoggedIn = false;
@@ -842,13 +797,11 @@ function adminLogout() {
 }
 function toggleSiteMode() {
   data.siteMode = data.siteMode === 'open' ? 'closed' : 'open';
-  saveData();
-  updateSiteModeBtn();
+  saveData(); updateSiteModeBtn();
   toast('Site modu: ' + (data.siteMode === 'open' ? 'AÇIK' : 'KAPALI'), data.siteMode === 'open' ? 'success' : 'warn');
 }
 function updateSiteModeBtn() {
-  const btn = document.getElementById('siteModeBtn');
-  if (!btn) return;
+  const btn = document.getElementById('siteModeBtn'); if (!btn) return;
   if (data.siteMode === 'open') { btn.textContent = '🟢 Site: Açık'; btn.className = 'btn bg-green-600 hover:bg-green-700 text-white'; }
   else { btn.textContent = '🔴 Site: Kapalı'; btn.className = 'btn bg-red-600 hover:bg-red-700 text-white'; }
 }
@@ -859,7 +812,6 @@ function renderAdminPanel() {
   document.getElementById('admProducts').textContent = data.marketProducts.length;
   document.getElementById('admOrders').textContent = data.orders.length;
 
-  // Products
   const pl = document.getElementById('admProductList');
   pl.innerHTML = data.marketProducts.length ? data.marketProducts.map(p => `
     <div class="flex items-center justify-between p-2 border border-slate-200 rounded">
@@ -867,7 +819,6 @@ function renderAdminPanel() {
       <button onclick="adminDeleteProduct(${p.id})" class="text-red-500 hover:text-red-700 text-xs font-semibold">Sil</button>
     </div>`).join('') : '<p class="text-slate-400 text-sm">Ürün yok</p>';
 
-  // Users
   const ul = document.getElementById('admUserList');
   ul.innerHTML = data.adminUsers.length ? data.adminUsers.map(u => `
     <div class="flex items-center justify-between p-2 border border-slate-200 rounded">
@@ -875,7 +826,6 @@ function renderAdminPanel() {
       <span class="badge badge-${u.plan==='vip'?'purple':u.plan==='pro'?'amber':u.plan==='standard'?'blue':'slate'}">${(u.plan||'free').toUpperCase()}</span>
     </div>`).join('') : '<p class="text-slate-400 text-sm">Kullanıcı yok</p>';
 
-  // Orders
   const ol = document.getElementById('admOrderList');
   ol.innerHTML = data.orders.length ? data.orders.slice().reverse().map(o => `
     <div class="p-3 border border-slate-200 rounded bg-slate-50">
@@ -884,7 +834,6 @@ function renderAdminPanel() {
         <span class="text-xs text-slate-400">${new Date(o.createdAt).toLocaleString('tr-TR')}</span>
       </div>
       <div class="text-xs text-slate-600">👤 ${esc(o.customerName||'-')} · 📞 ${esc(o.customerPhone||'-')}</div>
-      ${o.note ? `<div class="text-xs text-slate-500 mt-1">📝 ${esc(o.note)}</div>` : ''}
       <div class="mt-2 flex gap-2">
         <a href="https://wa.me/${(o.customerPhone||'').replace(/\D/g,'')}?text=${encodeURIComponent('Merhaba '+(o.customerName||'')+', '+o.itemName+' siparişiniz hakkında bilgi vermek istiyoruz.')}" target="_blank" class="btn btn-whatsapp text-xs">💬 WhatsApp</a>
         <button onclick="adminDeleteOrder(${o.id})" class="btn btn-outline text-xs">Sil</button>
@@ -899,23 +848,19 @@ function adminAddProduct() {
   saveData();
   document.getElementById('admProdName').value = '';
   document.getElementById('admProdPrice').value = '';
-  renderAdminPanel();
-  renderAll();
+  renderAdminPanel(); renderAll();
   toast('Ürün eklendi', 'success');
 }
 function adminDeleteProduct(id) {
   if (!confirm('Ürünü silmek istediğinize emin misiniz?')) return;
   data.marketProducts = data.marketProducts.filter(p => p.id !== id);
-  saveData();
-  renderAdminPanel();
-  renderAll();
+  saveData(); renderAdminPanel(); renderAll();
   toast('Ürün silindi', 'success');
 }
 function adminDeleteOrder(id) {
   if (!confirm('Siparişi silmek istediğinize emin misiniz?')) return;
   data.orders = data.orders.filter(o => o.id !== id);
-  saveData();
-  renderAdminPanel();
+  saveData(); renderAdminPanel();
   toast('Sipariş silindi', 'success');
 }
 
@@ -978,18 +923,17 @@ function calc() {
   return { totalIncome, totalExpense, totalDebt, totalDebtPayment, totalReceivable, totalAssets, totalInvestments, netCash, netWorth, savingsRate };
 }
 
-// ==================== FIRE TYPES ====================
+// ==================== FIRE ====================
 const FIRE_TYPES = {
   lean: { name: 'Lean FIRE', desc: 'Minimum yaşam, %50-70 gider', mult: 0.7, rate: 4 },
   regular: { name: 'Regular FIRE', desc: 'Mevcut yaşam standardı', mult: 1, rate: 4 },
-  fat: { name: 'Fat FIRE', desc: 'Konforlu yaşam, %150-200 gider', mult: 1.7, rate: 3.5 },
+  fat: { name: 'Fat FIRE', desc: 'Konforlu yaşam', mult: 1.7, rate: 3.5 },
   barista: { name: 'Barista FIRE', desc: 'Yarı zamanlı çalışma', mult: 0.6, rate: 4.5 },
   coast: { name: 'Coast FIRE', desc: 'Sadece katkı, çekim yok', mult: 1, rate: 4 },
   cashflow: { name: 'Cashflow FIRE', desc: 'Pasif gelir ile yaşam', mult: 1, rate: 5 },
 };
 function renderFireTypes() {
-  const grid = document.getElementById('fireTypeGrid');
-  if (!grid) return;
+  const grid = document.getElementById('fireTypeGrid'); if (!grid) return;
   grid.innerHTML = Object.entries(FIRE_TYPES).map(([k,v]) => {
     const active = data.fire.type === k;
     return `<button onclick="setFireType('${k}')" class="p-3 rounded-lg border-2 text-left transition ${active?'border-amber-500 bg-amber-50':'border-slate-200 hover:border-slate-300'}">
@@ -1000,12 +944,9 @@ function renderFireTypes() {
   }).join('');
 }
 function setFireType(t) {
-  data.fire.type = t;
-  data.fire.rate = FIRE_TYPES[t].rate;
-  saveData();
+  data.fire.type = t; data.fire.rate = FIRE_TYPES[t].rate; saveData();
   document.getElementById('fireRate').value = data.fire.rate;
-  renderFire();
-  renderFireTypes();
+  renderFire(); renderFireTypes();
 }
 
 // ==================== RENDER ====================
@@ -1040,7 +981,6 @@ function renderDashboard() {
 
   renderCharts(c); renderAlerts(c); renderHealthScore(c);
 }
-
 function renderIncome() {
   const tbody = document.getElementById('incomeTable'); if (!tbody) return;
   const list = filtered(data.incomes).sort((a,b)=>b.date.localeCompare(a.date));
@@ -1105,7 +1045,7 @@ function renderAssets() {
 function renderInvestments() {
   const total = data.investments.reduce((s,x)=>s+Number(x.amount||0),0);
   const cost = data.investments.reduce((s,x)=>s+Number(x.cost||0),0);
-  const pl = total - cost; const ret = cost > 0 ? (pl/cost*100) : 0;
+  const pl = total - cost, ret = cost > 0 ? (pl/cost*100) : 0;
   const set = (id,v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
   set('invTotal', fmt(total));
   const plEl = document.getElementById('invPL'); if (plEl) { plEl.textContent = fmt(pl); plEl.className = 'text-2xl font-bold mt-2 ' + (pl>=0?'text-green-600':'text-red-500'); }
@@ -1139,15 +1079,27 @@ function renderGoals() {
 }
 function renderEmergency() {
   const mEl = document.getElementById('emMonthly'), cEl = document.getElementById('emCurrent');
-  if (mEl && !mEl.value) mEl.value = data.emergencyFund.monthly;
-  if (cEl && !cEl.value) cEl.value = data.emergencyFund.current;
-  const m = Number(mEl?.value||0), c = Number(cEl?.value||0);
+  if (!mEl || !cEl) return;
+  if (!mEl.dataset.touched) mEl.value = data.emergencyFund.monthly || 50000;
+  if (!cEl.dataset.touched) cEl.value = data.emergencyFund.current || 0;
+  const m = Number(mEl.value) || 0, c = Number(cEl.value) || 0;
   data.emergencyFund.monthly = m; data.emergencyFund.current = c;
   const grid = document.getElementById('emGrid'); if (!grid) return;
+  const icons = { 3: '🛡️', 6: '🛡️🛡️', 12: '🛡️🛡️🛡️' };
+  const labels = { 3: '3 Aylık (Temel)', 6: '6 Aylık (Önerilen)', 12: '12 Aylık (Güvenli)' };
   grid.innerHTML = [3,6,12].map(t => {
-    const target = m * t; const pct = target > 0 ? Math.min(100, c/target*100) : 0;
+    const target = m * t, pct = target > 0 ? Math.min(100, c/target*100) : 0;
     const cls = pct >= 100 ? '' : pct >= 50 ? 'warn' : 'danger';
-    return `<div class="card p-5"><h4 class="font-bold text-slate-800 mb-3">${t} Aylık Acil Fon</h4><p class="text-2xl font-bold text-slate-800 mb-2">${fmt(target)}</p><p class="text-sm text-slate-500 mb-3">${fmt(c)} / ${fmt(target)}</p><div class="progress-bar"><div class="progress-fill ${cls}" style="width:${pct}%"></div></div><p class="text-xs text-slate-500 mt-2 font-semibold">%${pct.toFixed(1)} tamamlandı</p></div>`;
+    const status = pct >= 100 ? '✓ Hedefe ulaşıldı' : `Eksik: ${fmt(Math.max(0, target - c))}`;
+    const statusColor = pct >= 100 ? 'text-green-600' : 'text-red-500';
+    return `<div class="card p-5">
+      <div class="flex items-center gap-2 mb-3"><span class="text-2xl">${icons[t]}</span><h4 class="font-bold text-slate-800">${labels[t]}</h4></div>
+      <p class="text-3xl font-bold text-slate-800 mb-3">${fmt(target)}</p>
+      <div class="flex justify-between text-sm text-slate-500 mb-2"><span>Mevcut:</span><span class="font-semibold text-slate-700">${fmt(c)}</span></div>
+      <div class="flex justify-between text-sm text-slate-500 mb-3"><span>Hedef:</span><span class="font-semibold text-slate-700">${fmt(target)}</span></div>
+      <div class="progress-bar mb-2"><div class="progress-fill ${cls}" style="width:${pct}%"></div></div>
+      <div class="flex justify-between text-xs"><span class="font-bold text-slate-700">%${pct.toFixed(1)} tamamlandı</span><span class="${statusColor} font-semibold">${status}</span></div>
+    </div>`;
   }).join('');
 }
 function renderPlan12() {
@@ -1168,9 +1120,10 @@ function computeFireTarget() {
 }
 function renderFire() {
   const mEl = document.getElementById('fireMonthly'), rEl = document.getElementById('fireRate');
-  if (mEl && !mEl.value) mEl.value = data.fire.monthly;
-  if (rEl && !rEl.value) rEl.value = data.fire.rate;
-  const m = Number(mEl?.value||0), r = Number(rEl?.value||4);
+  if (!mEl || !rEl) return;
+  if (!mEl.dataset.touched) mEl.value = data.fire.monthly || 60000;
+  if (!rEl.dataset.touched) rEl.value = data.fire.rate || 4;
+  const m = Number(mEl.value) || 0, r = Number(rEl.value) || 4;
   data.fire.monthly = m; data.fire.rate = r;
   const target = computeFireTarget();
   const current = calc().totalInvestments;
@@ -1178,12 +1131,10 @@ function renderFire() {
   const set = (id,v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
   set('fireTarget', fmt(target)); set('fireCurrent', fmt(current)); set('fireProgress', '%' + pct.toFixed(1));
 
-  // FIRE year estimation
   const annualContrib = Number(data.fire.annualContribution||0) + (calc().netCash*12);
   const expectedReturn = Number(data.fire.expectedReturn||7) / 100;
   let yearText = 'Hesaplanamadı';
   if (annualContrib > 0 && target > current) {
-    const remaining = target - current;
     let years = 0, balance = current;
     while (balance < target && years < 80) { balance = balance * (1 + expectedReturn) + annualContrib; years++; }
     if (years < 80) yearText = (new Date().getFullYear() + years) + ' (~' + years + ' yıl)';
@@ -1200,7 +1151,7 @@ function renderFire() {
   });
 }
 
-// ==================== MARKET / PACKAGES / CONSULTING ====================
+// ==================== MARKET / PACKAGES ====================
 function renderMarket() {
   const grid = document.getElementById('marketGrid'); if (!grid) return;
   if (!data.marketProducts.length) { grid.innerHTML = '<p class="text-slate-400">Ürün yok.</p>'; return; }
@@ -1213,7 +1164,7 @@ function renderMarket() {
       <div class="text-2xl font-bold text-amber-600 mb-3">${fmt(p.price)}</div>
       <div class="flex gap-2">
         <button onclick="buyItem('product', ${p.id})" class="btn btn-whatsapp flex-1 text-sm">💬 Satın Al</button>
-        <button onclick="deleteItem('marketProducts',${p.id})" class="btn btn-outline text-sm">🗑️</button>
+        <button onclick="deleteItem('marketProducts',${p.id})" class="btn btn-outline text-sm" title="Sil">🗑️</button>
       </div>
     </div>`).join('');
 }
@@ -1222,7 +1173,7 @@ function renderUserPackages() {
   grid.innerHTML = data.userPackages.map(p => {
     const badge = p.color === 'purple' ? 'badge-purple' : p.color === 'amber' ? 'badge-amber' : p.color === 'blue' ? 'badge-blue' : 'badge-slate';
     const active = data.user.plan === p.id;
-    return `<div class="card p-6 ${active ? 'border-2 border-amber-500' : ''}">
+    return `<div class="card pkg-card p-6 ${p.popular ? 'pkg-popular' : ''} ${active ? 'border-2 border-amber-500' : ''}">
       <div class="flex justify-between items-start mb-3">
         <h4 class="text-xl font-bold text-slate-800">${esc(p.name)}</h4>
         <span class="badge ${badge}">${active?'AKTİF':'PAKET'}</span>
@@ -1239,8 +1190,7 @@ function renderUserPackages() {
 function renderConsulting() {
   const grid = document.getElementById('consultingGrid'); if (!grid) return;
   grid.innerHTML = data.consultingPackages.map(c => `
-    <div class="card p-6 ${c.popular ? 'border-2 border-amber-500 relative' : ''}">
-      ${c.popular ? '<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">EN POPÜLER</div>' : ''}
+    <div class="card pkg-card p-6 ${c.popular ? 'pkg-popular' : ''}">
       <div class="text-5xl text-center mb-3">${c.icon||'💼'}</div>
       <h4 class="text-xl font-bold text-slate-800 text-center mb-2">${esc(c.name)}</h4>
       <div class="text-center text-xs text-slate-500 mb-4">${esc(c.duration)}</div>
@@ -1251,7 +1201,6 @@ function renderConsulting() {
       <button onclick="buyItem('consulting', '${c.id}')" class="btn btn-whatsapp w-full">💬 WhatsApp ile Başvur</button>
     </div>`).join('');
 }
-
 function buyItem(type, id) {
   let itemName = '', price = 0;
   if (type === 'product') { const p = data.marketProducts.find(x => x.id === id); if (!p) return; itemName = p.name; price = p.price; }
@@ -1261,7 +1210,6 @@ function buyItem(type, id) {
   const msg = `Merhaba, ${itemName} (${fmt(price)}) hakkında bilgi almak ve satın almak istiyorum.`;
   const wa = `https://wa.me/9${CFO.phone}?text=${encodeURIComponent(msg)}`;
 
-  // Register order
   data.orders.push({
     id: uid(), type, itemName, price,
     customerName: data.user.name || '-',
@@ -1270,8 +1218,6 @@ function buyItem(type, id) {
     createdAt: new Date().toISOString(),
   });
   saveData();
-  if (data.orders.length === 1) renderAdminPanel();
-
   window.open(wa, '_blank');
   toast('WhatsApp açılıyor...', 'success');
 }
@@ -1279,7 +1225,7 @@ function buyItem(type, id) {
 // ==================== CHARTS ====================
 function renderCharts(c) {
   if (!c) c = calc();
-  const mk = (id, cfg) => { const el = document.getElementById(id); if (!el) return null; if (charts[id]) charts[id].destroy(); charts[id] = new Chart(el, cfg); };
+  const mk = (id, cfg) => { const el = document.getElementById(id); if (!el) return; if (charts[id]) charts[id].destroy(); charts[id] = new Chart(el, cfg); };
 
   mk('chartIncomeExpense', { type: 'bar', data: { labels: ['Bu Dönem'], datasets: [
     { label: 'Gelir', data: [c.totalIncome], backgroundColor: '#10b981', borderRadius: 6 },
@@ -1425,7 +1371,6 @@ const modalFields = {
     { name:'icon', label:'İkon (emoji)', type:'text', default:'📦' },
   ],
 };
-
 let currentModalType = null;
 function openModal(type) {
   currentModalType = type;
@@ -1462,7 +1407,7 @@ function exportExcel() {
   const wb = XLSX.utils.book_new();
   const c = calc();
   const dash = [
-    ['ODAK Finans 360 - Dashboard'], ['Tarih', new Date().toLocaleString('tr-TR')], [],
+    ['ODAK Finansal Yönetim Paneli - Dashboard'], ['Tarih', new Date().toLocaleString('tr-TR')], [],
     ['GÖSTERGE', 'DEĞER'],
     ['Toplam Varlık', c.totalAssets], ['Toplam Borç', c.totalDebt], ['Toplam Alacak', c.totalReceivable],
     ['Net Servet', c.netWorth], ['Aylık Gelir', c.totalIncome], ['Aylık Gider', c.totalExpense],
@@ -1484,7 +1429,7 @@ function exportExcel() {
   XLSX.utils.book_append_sheet(wb, toSheet(data.budgets, ['id','category','budget']), 'Bütçe');
   XLSX.utils.book_append_sheet(wb, toSheet(data.goals, ['id','name','target','current','monthly','due']), 'Hedefler');
   XLSX.utils.book_append_sheet(wb, toSheet(data.marketProducts, ['id','name','price','category','desc']), 'Market');
-  XLSX.writeFile(wb, 'ODAK_Finans_360_' + new Date().toISOString().slice(0,10) + '.xlsx');
+  XLSX.writeFile(wb, 'ODAK_Finansal_Yonetim_' + new Date().toISOString().slice(0,10) + '.xlsx');
   toast('Excel indirildi', 'success');
 }
 
@@ -1518,10 +1463,7 @@ function saveGeminiKey() {
   data.geminiKey = k; saveData();
   toast(k ? 'API anahtarı kaydedildi' : 'Anahtar silindi', 'success');
 }
-function loadGeminiKey() {
-  const el = document.getElementById('geminiKey');
-  if (el) el.value = data.geminiKey || '';
-}
+function loadGeminiKey() { const el = document.getElementById('geminiKey'); if (el) el.value = data.geminiKey || ''; }
 async function testGemini() {
   const key = data.geminiKey || document.getElementById('geminiKey').value.trim();
   if (!key) return toast('Önce API anahtarı girin', 'error');
@@ -1539,8 +1481,7 @@ async function testGemini() {
 }
 function buildFinancialContext() {
   const c = calc();
-  const exp = filtered(data.expenses);
-  const inc = filtered(data.incomes);
+  const exp = filtered(data.expenses), inc = filtered(data.incomes);
   const catTotals = {};
   exp.forEach(e => { catTotals[e.category] = (catTotals[e.category]||0) + Number(e.amount||0); });
   const topExp = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -1561,17 +1502,15 @@ async function runGemini(type) {
   if (!key) return toast('Önce Gemini API anahtarı girin', 'error');
   const el = document.getElementById('aiOutput');
   el.innerHTML = '<div class="flex items-center gap-3"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-500"></div><span class="text-slate-500">Gemini AI düşünüyor...</span></div>';
-
   const ctx = buildFinancialContext();
   const prompts = {
     summary: `Sen deneyimli bir kişisel finans danışmanısın. Aşağıdaki kullanıcı verilerini analiz ederek Türkçe, samimi ama profesyonel bir "finansal durum özeti" yaz. Kısa paragraflar ve madde işaretleri kullan. En sonda 1 cümlelik genel değerlendirme yap. Veriler: ${JSON.stringify(ctx, null, 2)}`,
-    advice: `Sen deneyimli bir finansal koçsun. Aşağıdaki kullanıcı verilerine göre 5-7 somut, uygulanabilir öneri ver. Türkçe yaz. Her öneri 1-2 cümle olsun. Kesin yatırım tavsiyesi verme, "eğitim amaçlı" olduğunu belirt. Veriler: ${JSON.stringify(ctx, null, 2)}`,
+    advice: `Sen deneyimli bir finansal koçsun. Aşağıdaki kullanıcı verilerine göre 5-7 somut, uygulanabilir öneri ver. Türkçe yaz. Kesin yatırım tavsiyesi verme, "eğitim amaçlı" olduğunu belirt. Veriler: ${JSON.stringify(ctx, null, 2)}`,
     budget: `Sen bir bütçe analisti olarak aşağıdaki verilere göre bütçe analizi yap. Hangi kategorilerde tasarruf edilebilir, hangileri kontrol altında, hangileri riskli — Türkçe, madde işaretli olarak açıkla. Veriler: ${JSON.stringify(ctx, null, 2)}`,
     fire: `Sen bir FIRE (Finansal Özgürlük) uzmanısın. Kullanıcının FIRE tipi: ${ctx.fireTip}, FIRE hedefi: ${ctx.fireHedef}₺, mevcut yatırım: ${ctx.yatirim}₺. Türkçe olarak FIRE yolculuğunu değerlendir, kalan süreyi tahmin et, somut adımlar öner. Kesin yatırım tavsiyesi verme. Veriler: ${JSON.stringify(ctx, null, 2)}`,
-    debt: `Sen bir borç yönetimi uzmanısın. Aşağıdaki borç verilerine göre Türkçe olarak: (1) mevcut durumu özetle, (2) borç kapatma stratejisi öner (kar topu veya çığ yöntemi), (3) somut öneriler ver. Kesin tavsiye değil, eğitim amaçlı olduğunu belirt. Veriler: ${JSON.stringify(ctx, null, 2)}`,
+    debt: `Sen bir borç yönetimi uzmanısın. Aşağıdaki borç verilerine göre Türkçe olarak: (1) mevcut durumu özetle, (2) borç kapatma stratejisi öner, (3) somut öneriler ver. Kesin tavsiye değil, eğitim amaçlı olduğunu belirt. Veriler: ${JSON.stringify(ctx, null, 2)}`,
   };
   const prompt = prompts[type] || prompts.summary;
-
   try {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1581,15 +1520,11 @@ async function runGemini(type) {
     if (j.error) { el.innerHTML = `<p class="text-red-500">Hata: ${esc(j.error.message)}</p>`; return; }
     const text = j.candidates?.[0]?.content?.parts?.[0]?.text || 'Yanıt alınamadı.';
     el.innerHTML = `
-      <div class="prose prose-sm max-w-none">
-        <div class="text-xs text-amber-600 font-bold mb-2">🤖 Gemini AI Yanıtı</div>
-        <div class="text-slate-700 whitespace-pre-wrap leading-relaxed">${esc(text)}</div>
-        <div class="text-xs text-slate-400 mt-4 pt-3 border-t">⚠️ Bu analiz finansal eğitim amaçlıdır. Kesin yatırım tavsiyesi değildir.</div>
-      </div>
+      <div class="text-xs text-amber-600 font-bold mb-2">🤖 Gemini AI Yanıtı</div>
+      <div class="text-slate-700 whitespace-pre-wrap leading-relaxed">${esc(text)}</div>
+      <div class="text-xs text-slate-400 mt-4 pt-3 border-t">⚠️ Bu analiz finansal eğitim amaçlıdır. Kesin yatırım tavsiyesi değildir.</div>
     `;
-  } catch(e) {
-    el.innerHTML = `<p class="text-red-500">Bağlantı hatası: ${esc(e.message)}</p>`;
-  }
+  } catch(e) { el.innerHTML = `<p class="text-red-500">Bağlantı hatası: ${esc(e.message)}</p>`; }
 }
 
 // ==================== SETTINGS ====================
@@ -1634,15 +1569,9 @@ function toast(msg, type = '') {
 document.addEventListener('DOMContentLoaded', () => {
   const m = document.getElementById('modal');
   if (m) m.addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
-  const f = document.getElementById('dateFilterMobile');
-  if (f) f.value = 'thisMonth';
-  const fy = document.getElementById('footerYear');
-  if (fy) fy.textContent = new Date().getFullYear();
-  setLang(data.lang || 'tr');
-  // Site kapalıysa giriş ekranında uyarı
-  if (data.siteMode === 'closed') {
-    setTimeout(() => toast('⚠️ Site şu anda kapalı. Yönetici ile iletişime geçin.', 'warn'), 500);
-  }
+  const f = document.getElementById('dateFilterMobile'); if (f) f.value = 'thisMonth';
+  const fy = document.getElementById('footerYear'); if (fy) fy.textContent = new Date().getFullYear();
+  if (data.siteMode === 'closed') setTimeout(() => toast('⚠️ Site şu anda kapalı.', 'warn'), 500);
 });
 </script>
 </body>
